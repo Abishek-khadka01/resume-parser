@@ -13,12 +13,10 @@ export function Topnav() {
   return (
     <header className="flex h-14 items-center justify-end border-b px-6">
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="flex items-center gap-2 rounded-full outline-none">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback>{user?.email?.[0]?.toUpperCase() ?? 'U'}</AvatarFallback>
-            </Avatar>
-          </button>
+        <DropdownMenuTrigger className="flex items-center gap-2 rounded-full outline-none cursor-pointer">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback>{user?.email?.[0]?.toUpperCase() ?? 'U'}</AvatarFallback>
+          </Avatar>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem disabled className="text-xs text-muted-foreground">
