@@ -30,7 +30,7 @@ export default function App() {
           <Route
             element={
               <ProtectedRoute>
-                <DashboardLayout />
+                <AuthLayout />
               </ProtectedRoute>
             }
           >
@@ -43,6 +43,7 @@ export default function App() {
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <AuthModal />
       </BrowserRouter>
       <Toaster position="top-right" richColors />
     </QueryClientProvider>

@@ -1,201 +1,307 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-  Briefcase,
-  GraduationCap,
-  Users,
-  Building2,
-  ArrowRight,
-  Globe,
-} from "lucide-react";
+  faSearch,
+  faBriefcase,
+  faHome,
+  faFileContract,
+  faBookmark,
+  faExternalLinkAlt,
+  faGraduationCap,
+  faCheck,
+  faTimes,
+} from '@fortawesome/free-solid-svg-icons'
+import { Skeleton } from '@/components/ui/skeleton'
+import { cn, getMatchColor } from '@/lib/utils'
+import api from '@/lib/api'
+import type { Job } from '@/types'
 
-const LinkedinIcon = ({ size = 30 }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="currentColor"
-  >
-    <path d="M20.447 20.452H16.89v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.344V9h3.414v1.561h.049c.476-.9 1.637-1.85 3.369-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.063 2.063 0 110-4.126 2.063 2.063 0 010 4.126zM7.119 20.452H3.555V9h3.564v11.452z" />
-  </svg>
-);
+const JOB_TYPES = [
+  { value: 'full_time', label: 'Full-time', icon: faBriefcase },
+  { value: 'remote', label: 'Remote', icon: faHome },
+  { value: 'contract', label: 'Contract', icon: faFileContract },
+]
 
-const Job = () => {
-  const navigate = useNavigate();
+const EXPERIENCE_LEVELS = ['Entry', 'Mid', 'Senior', 'Lead']
 
-  const platforms = [
-    {
-      title: "LinkedIn Jobs",
-      icon: <LinkedinIcon size={30} />,
-      image:
-        "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1200&auto=format&fit=crop",
-      description:
-        "Find jobs, connect with recruiters, and build your professional network.",
-      button: "Visit LinkedIn",
-      link: "/linkedin-jobs",
-      bg: "bg-blue-600",
+function formatSalary(min?: number, max?: number): string | null {
+  if (min == null && max == null) return null
+  const a = min != null ? `$${(min / 1000).toFixed(0)}k` : ''
+  const b = max != null ? `$${(max / 1000).toFixed(0)}k` : ''
+  if (a && b && a !== b) return `${a} - ${b}`
+  return a || b
+}
+
+export default function Jobs() {
+  const [search, setSearch] = useState('')
+  const [query, setQuery] = useState('')
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
+  const [selectedLevels, setSelectedLevels] = useState<string[]>([])
+  const queryClient = useQueryClient()
+
+  const { data: jobs, isLoading } = useQuery<Job[]>({
+    queryKey: ['jobs', query],
+    queryFn: () => api.get('/jobs/search', { params: { q: query } }).then((r) => r.data),
+    enabled: true,
+  })
+
+  const saveMutation = useMutation({
+    mutationFn: (job: Job) =>
+      api.post('/applications', {
+        job_id: job.job_id,
+        job_title: job.job_title,
+        company_name: job.employer_name,
+        company_logo_url: job.employer_logo,
+        match_score: job.match_score,
+        status: 'saved',
+        job_data: job,
+      }),
+    onSuccess: () => {
+      toast.success('Job saved to ATS board')
+      queryClient.invalidateQueries({ queryKey: ['applications'] })
     },
-    {
-      title: "Internship Platforms",
-      icon: <GraduationCap size={30} />,
-      image:
-        "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop",
-      description:
-        "Discover internships to gain real-world experience and boost your career.",
-      button: "Explore Internships",
-      link: "/internships",
-      bg: "bg-green-600",
-    },
-    {
-      title: "Other Job Methods",
-      icon: <Globe size={30} />,
-      image:
-        "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1200&auto=format&fit=crop",
-      description:
-        "Use referrals, job fairs, and company career pages to find opportunities.",
-      button: "Learn More",
-      link: "#",
-      bg: "bg-purple-600",
-    },
-  ];
+    onError: () => toast.error('Failed to save job'),
+  })
+
+  const toggleType = (value: string) => {
+    setSelectedTypes((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    )
+  }
+
+  const toggleLevel = (value: string) => {
+    setSelectedLevels((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    )
+  }
+
+  const clearFilters = () => {
+    setSelectedTypes([])
+    setSelectedLevels([])
+    setSearch('')
+    setQuery('')
+  }
+
+  const hasActiveFilters = selectedTypes.length > 0 || selectedLevels.length > 0 || query.length > 0
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* HERO SECTION */}
-      <section className="relative h-[500px] overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1600&auto=format&fit=crop"
-          alt="Jobs"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+    <div className="flex flex-col lg:flex-row gap-6">
+      <aside className="w-full lg:w-64 shrink-0">
+        <div className="lg:sticky lg:top-4 rounded-2xl border border-[#74007a]/10 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faSearch} className="w-3.5 h-3.5 text-[#74007a]" />
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Filters</h3>
+            </div>
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="text-xs text-slate-400 hover:text-[#74007a] transition-colors cursor-pointer flex items-center gap-1"
+              >
+                <FontAwesomeIcon icon={faTimes} className="w-2.5 h-2.5" />
+                Clear
+              </button>
+            )}
+          </div>
 
-        <div className="absolute inset-0 bg-black/60" />
-
-        <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center text-white">
-          <h1 className="text-5xl font-bold md:text-6xl">
-            Find Your Dream Job
-          </h1>
-
-          <p className="mt-4 max-w-2xl text-gray-200">
-            Explore jobs, internships, networking, and career opportunities all
-            in one place.
-          </p>
-
-          <button
-            onClick={() => navigate("/")}
-            className="mt-8 rounded-xl bg-white px-6 py-3 font-semibold text-black hover:bg-gray-200"
-          >
-            Back Home
-          </button>
-        </div>
-      </section>
-
-      {/* CARDS SECTION */}
-      <section className="mx-auto max-w-7xl px-6 py-20">
-        <h2 className="mb-12 text-center text-4xl font-bold text-slate-800">
-          Job Platforms
-        </h2>
-
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {platforms.map((item, index) => (
-            <div
-              key={index}
-              className="overflow-hidden rounded-3xl bg-white shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+          <div className="flex gap-2 mb-5">
+            <input
+              placeholder="Title, skill..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && setQuery(search)}
+              className="flex-1 h-9 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#74007a] focus:ring-1 focus:ring-[#74007a]/20 transition-all"
+            />
+            <button
+              onClick={() => setQuery(search)}
+              className="h-9 w-9 flex items-center justify-center rounded-lg bg-[#4a0080] hover:bg-[#5c00a0] text-white transition-colors cursor-pointer"
+              aria-label="Search jobs"
             >
-              <img
-                src={item.image}
-                alt={item.title}
-                className="h-60 w-full object-cover"
-              />
+              <FontAwesomeIcon icon={faSearch} className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
-              <div className="p-6">
-                <div
-                  className={`inline-flex rounded-xl p-3 text-white ${item.bg}`}
-                >
-                  {item.icon}
-                </div>
-
-                <h3 className="mt-4 text-2xl font-bold text-slate-800">
-                  {item.title}
-                </h3>
-
-                <p className="mt-3 text-gray-600">{item.description}</p>
-
-                {item.link !== "#" ? (
-                  <a
-                    href={item.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`mt-6 inline-flex items-center gap-2 rounded-lg px-5 py-3 text-white ${item.bg}`}
-                  >
-                    {item.button}
-                    <ArrowRight size={18} />
-                  </a>
-                ) : (
+          <div className="mb-5">
+            <div className="flex items-center gap-2 mb-3">
+              <FontAwesomeIcon icon={faBriefcase} className="w-3 h-3 text-[#74007a]" />
+              <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">Job Type</span>
+            </div>
+            <div className="flex flex-col gap-2">
+              {JOB_TYPES.map(({ value, label, icon }) => {
+                const active = selectedTypes.includes(value)
+                return (
                   <button
-                    className={`mt-6 inline-flex items-center gap-2 rounded-lg px-5 py-3 text-white ${item.bg}`}
+                    key={value}
+                    onClick={() => toggleType(value)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all cursor-pointer ${
+                      active
+                        ? 'bg-[#74007a]/8 text-[#74007a] font-semibold'
+                        : 'text-slate-600 hover:bg-slate-50'
+                    }`}
                   >
-                    {item.button}
-                    <ArrowRight size={18} />
+                    <div
+                      className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
+                        active ? 'border-[#74007a] bg-[#74007a]' : 'border-slate-300'
+                      }`}
+                    >
+                      {active && <FontAwesomeIcon icon={faCheck} className="w-2.5 h-2.5 text-white" />}
+                    </div>
+                    <FontAwesomeIcon icon={icon} className="w-3.5 h-3.5 text-slate-400" />
+                    {label}
                   </button>
-                )}
-              </div>
+                )
+              })}
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
 
-      {/* EXTRA METHODS */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-6xl px-6">
-          <h2 className="mb-12 text-center text-4xl font-bold text-slate-800">
-            More Ways to Get Jobs
-          </h2>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            <div className="rounded-3xl border p-8 text-center">
-              <Building2 className="mx-auto mb-4 text-blue-600" size={50} />
-              <h3 className="text-xl font-semibold">Company Websites</h3>
-              <p className="mt-2 text-gray-600">
-                Apply directly from company career pages.
-              </p>
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <FontAwesomeIcon icon={faGraduationCap} className="w-3 h-3 text-[#74007a]" />
+              <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">Experience</span>
             </div>
-
-            <div className="rounded-3xl border p-8 text-center">
-              <Users className="mx-auto mb-4 text-green-600" size={50} />
-              <h3 className="text-xl font-semibold">Networking</h3>
-              <p className="mt-2 text-gray-600">
-                Connect with professionals and get referrals.
-              </p>
-            </div>
-
-            <div className="rounded-3xl border p-8 text-center">
-              <Briefcase className="mx-auto mb-4 text-purple-600" size={50} />
-              <h3 className="text-xl font-semibold">Job Fairs</h3>
-              <p className="mt-2 text-gray-600">
-                Meet recruiters and explore opportunities.
-              </p>
+            <div className="flex flex-col gap-2">
+              {EXPERIENCE_LEVELS.map((level) => {
+                const active = selectedLevels.includes(level)
+                return (
+                  <button
+                    key={level}
+                    onClick={() => toggleLevel(level)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all cursor-pointer ${
+                      active
+                        ? 'bg-[#74007a]/8 text-[#74007a] font-semibold'
+                        : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div
+                      className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
+                        active ? 'border-[#74007a] bg-[#74007a]' : 'border-slate-300'
+                      }`}
+                    >
+                      {active && <FontAwesomeIcon icon={faCheck} className="w-2.5 h-2.5 text-white" />}
+                    </div>
+                    {level}
+                  </button>
+                )
+              })}
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-slate-900 py-20 text-center text-white">
-        <h2 className="text-4xl font-bold">Start Your Career Today</h2>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-slate-900">Matched Jobs</h2>
+          {jobs && jobs.length > 0 && (
+            <span className="text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full font-medium">
+              {jobs.length} result{jobs.length !== 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
 
-        <p className="mt-4 text-gray-300">
-          Build your resume and apply consistently.
-        </p>
+        {isLoading && (
+          <div className="flex flex-col gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-28 w-full rounded-2xl" />
+            ))}
+          </div>
+        )}
 
-        <button
-          onClick={() => navigate("/resume")}
-          className="mt-8 rounded-xl bg-blue-600 px-8 py-4 font-semibold hover:bg-blue-700"
-        >
-          Create Resume
-        </button>
-      </section>
+        {!isLoading && (!jobs || jobs.length === 0) && (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-20 h-20 rounded-full bg-[#74007a]/8 flex items-center justify-center mb-5">
+              <FontAwesomeIcon icon={faSearch} className="w-8 h-8 text-[#74007a]/40" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">No jobs found</h3>
+            <p className="text-sm text-slate-400 max-w-sm">
+              Try adjusting your search terms or filters to discover matching opportunities.
+            </p>
+          </div>
+        )}
+
+        {!isLoading && jobs?.map((job) => {
+          const salaryLabel = formatSalary(job.job_min_salary, job.job_max_salary)
+          return (
+            <div
+              key={job.job_id}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 mb-3"
+            >
+              <div className="flex items-start gap-4">
+                {job.employer_logo ? (
+                  <img
+                    src={job.employer_logo}
+                    alt={job.employer_name}
+                    className="h-12 w-12 rounded-xl object-contain border border-slate-100 shrink-0"
+                  />
+                ) : (
+                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#4a0080] to-[#74007a] flex items-center justify-center text-white text-sm font-bold shrink-0">
+                    {job.employer_name?.charAt(0) ?? 'J'}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-slate-900 leading-tight">{job.job_title}</p>
+                      <p className="text-sm text-slate-500 mt-0.5">
+                        {job.employer_name}
+                        {(job.job_city || job.job_country) && (
+                          <> <span className="text-slate-300 mx-1">|</span> {job.job_city ?? ''}{job.job_city && job.job_country ? ', ' : ''}{job.job_country ?? ''}</>
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => saveMutation.mutate(job)}
+                        disabled={saveMutation.isPending}
+                        className="h-9 w-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-[#74007a] hover:border-[#74007a]/30 transition-all cursor-pointer"
+                        aria-label="Save job"
+                      >
+                        <FontAwesomeIcon icon={faBookmark} className="w-4 h-4" />
+                      </button>
+                      <a
+                        href={job.job_apply_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="h-9 px-4 flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#4a0080] via-[#74007a] to-[#da70dc] hover:from-[#da70dc] hover:via-[#74007a] hover:to-[#4a0080] text-white text-xs font-bold transition-all duration-300"
+                      >
+                        <FontAwesomeIcon icon={faExternalLinkAlt} className="w-3 h-3" />
+                        Apply
+                      </a>
+                      {job.match_score != null && (
+                        <span className={cn('inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-bold', getMatchColor(job.match_score))}>
+                          {job.match_score}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {job.job_employment_type && (
+                      <span className="inline-flex items-center rounded-lg border border-purple-200 bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-700">
+                        {job.job_employment_type.replace('_', ' ')}
+                      </span>
+                    )}
+                    {job.job_is_remote && (
+                      <span className="inline-flex items-center gap-1 rounded-lg border border-purple-200 bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-700">
+                        <FontAwesomeIcon icon={faHome} className="w-3 h-3" />
+                        Remote
+                      </span>
+                    )}
+                    {salaryLabel && (
+                      <span className="inline-flex items-center rounded-lg border border-pink-200 bg-pink-50 px-2.5 py-1 text-xs font-semibold text-pink-700">
+                        {salaryLabel}
+                      </span>
+                    )}
+                    {!job.job_employment_type && !job.job_is_remote && !salaryLabel && job.job_description && (
+                      <p className="text-xs text-slate-400 line-clamp-1">{job.job_description.slice(0, 120)}...</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   );
 };

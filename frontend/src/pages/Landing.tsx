@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faStar, faBolt, faBullseye, faClipboardList } from '@fortawesome/free-solid-svg-icons'
 import { Navbar } from '@/components/layout/Navbar'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuthStore } from '@/stores/authStore'
 
 export default function Landing() {
-  const { user } = useAuth()
+  const { user } = useAuthStore()
 
   return (
     <div className="min-h-screen bg-[#fafafc] text-slate-800 overflow-x-hidden flex flex-col">
@@ -19,7 +21,8 @@ export default function Landing() {
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 py-20 max-w-5xl mx-auto">
         {/* Decorative Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#74007a]/8 border border-[#74007a]/15 text-[#74007a] text-xs md:text-sm font-bold tracking-wide mb-8 animate-pulse">
-          ✨ Powered by Advanced Resume AI Matching
+          <FontAwesomeIcon icon={faStar} className="w-3.5 h-3.5" />
+          Powered by Advanced Resume AI Matching
         </div>
 
         {/* Hero Title */}
@@ -65,15 +68,15 @@ export default function Landing() {
         {/* Feature Grid Nudge */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-24 w-full max-w-4xl text-left">
           <div className="p-6 rounded-2xl bg-white border border-[#74007a]/10 hover:border-[#74007a]/25 shadow-[0_8px_20px_rgba(116,0,122,0.03)] hover:shadow-[0_12px_30px_rgba(116,0,122,0.08)] transition-all duration-300">
-            <h3 className="text-lg font-bold text-slate-900 mb-2">⚡ 1. AI Parsing</h3>
+            <h3 className="text-lg font-bold text-slate-900 mb-2"><FontAwesomeIcon icon={faBolt} className="w-4 h-4 text-[#74007a] mr-1.5" />1. AI Parsing</h3>
             <p className="text-sm text-slate-500">Instantly extract skills, experience, and education from PDF/DOCX resumes.</p>
           </div>
           <div className="p-6 rounded-2xl bg-white border border-[#74007a]/10 hover:border-[#74007a]/25 shadow-[0_8px_20px_rgba(116,0,122,0.03)] hover:shadow-[0_12px_30px_rgba(116,0,122,0.08)] transition-all duration-300">
-            <h3 className="text-lg font-bold text-slate-900 mb-2">🎯 2. Match Scores</h3>
+            <h3 className="text-lg font-bold text-slate-900 mb-2"><FontAwesomeIcon icon={faBullseye} className="w-4 h-4 text-[#74007a] mr-1.5" />2. Match Scores</h3>
             <p className="text-sm text-slate-500">See real-time compatibility scores for every job listing ranked by match %.</p>
           </div>
           <div className="p-6 rounded-2xl bg-white border border-[#74007a]/10 hover:border-[#74007a]/25 shadow-[0_8px_20px_rgba(116,0,122,0.03)] hover:shadow-[0_12px_30px_rgba(116,0,122,0.08)] transition-all duration-300">
-            <h3 className="text-lg font-bold text-slate-900 mb-2">📋 3. Kanban ATS</h3>
+            <h3 className="text-lg font-bold text-slate-900 mb-2"><FontAwesomeIcon icon={faClipboardList} className="w-4 h-4 text-[#74007a] mr-1.5" />3. Kanban ATS</h3>
             <p className="text-sm text-slate-500">Manage saved, applied, and active applications in a unified Kanban board.</p>
           </div>
         </div>
