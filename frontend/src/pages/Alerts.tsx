@@ -15,7 +15,7 @@ import type { JobAlert } from '@/types'
 const schema = z.object({
   keywords: z.string().min(1, 'Enter at least one keyword'),
   location: z.string().optional(),
-  min_match_pct: z.coerce.number().min(0).max(100).default(60),
+  min_match_pct: z.number().min(0).max(100),
   frequency: z.enum(['instant', 'daily', 'weekly']),
 })
 type FormData = z.infer<typeof schema>
@@ -30,7 +30,7 @@ export default function Alerts() {
 
   const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { frequency: 'daily', min_match_pct: 60 },
+    defaultValues: { frequency: 'daily', min_match_pct: 60, keywords: '', location: '' },
   })
 
   const createMutation = useMutation({
@@ -42,6 +42,10 @@ export default function Alerts() {
     },
     onError: () => toast.error('Failed to create alert'),
   })
+
+  const onSubmit = (data: FormData) => {
+    createMutation.mutate(data)
+  }
 
   const toggleMutation = useMutation({
     mutationFn: ({ id, is_active }: { id: string; is_active: boolean }) =>
@@ -56,7 +60,7 @@ export default function Alerts() {
       <Card>
         <CardHeader><CardTitle className="text-sm font-medium">New Alert</CardTitle></CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit((d) => createMutation.mutate(d))} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <Label>Keywords <span className="text-muted-foreground text-xs">(comma-separated)</span></Label>
               <Input placeholder="React, TypeScript, Frontend" {...register('keywords')} />
@@ -69,7 +73,7 @@ export default function Alerts() {
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label>Min Match %</Label>
-                <Input type="number" min={0} max={100} {...register('min_match_pct')} />
+                <Input type="number" min={0} max={100} {...register('min_match_pct', { valueAsNumber: true })} />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label>Frequency</Label>

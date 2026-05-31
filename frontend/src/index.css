@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #74007a;
+  --color-primary-dark: #4f0054;
+  --color-primary-darker: #36003a;
+  --color-secondary: #da70dc;
+  --color-secondary-light: #f3d4f5;
+  --color-navbar-bg: #3c0040;
+}
+
+/* Custom CSS utilities for navbar diagonal slashes and animations */
+.skew-slash {
+  transform: skewX(-25deg);
+}
+
+.skew-slash-reverse {
+  transform: skewX(25deg);
+}
