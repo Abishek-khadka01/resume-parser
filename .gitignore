@@ -3,6 +3,7 @@
 .env.local
 .env.*.local
 
+tests/
 # Python
 backend/venv/
 backend/__pycache__/
