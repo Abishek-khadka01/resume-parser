@@ -37,11 +37,12 @@ def googlelogin(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
 
 @router.post('/login')
 def userLogin(request : UserLogin, db : Session = Depends(get_db)): 
-    user = db.query(User).filter(User.email == request.email).first() 
+    user = db.query(User).filter(User.email == request.email).first()
+    print('the user is ', user ) 
     if not user: 
         raise HTTPException(status_code=400, detail='User do not exists')
     print(user)
-    checkpassword : bool = verify_password(request.password, user['password_hash'] )
+    checkpassword : bool = verify_password(request.password, user.password_hash )
     
     if not checkpassword:
         raise HTTPException(status_code=400, detail="Invalid Credentials")
