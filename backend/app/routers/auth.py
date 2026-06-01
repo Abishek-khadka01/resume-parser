@@ -10,6 +10,7 @@ from app.schemas.user import UserCreate, UserOut , UserLogin
 from app.core.security import verify_password
 from app.core.config import Settings
 from fastapi import Response
+
 router = APIRouter()
 
 
@@ -26,13 +27,6 @@ def register(body: UserCreate, db: Session = Depends(get_db)):
     return user
 
 
-@router.post("/google-login")
-def googlelogin(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == form.username).first()
-    if not user or not verify_password(form.password, user['password_hash'] or ""):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-    token = create_access_token({"sub": str(user.id), "email": user.email})
-    return {"access_token": token, "token_type": "bearer"}
 
 
 @router.post('/login')

@@ -15,7 +15,7 @@ import Alerts from '@/pages/Alerts'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 1000 * 60 * 5 } },
-})
+});
 
 export default function App() {
   return (
@@ -25,6 +25,7 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/auth/google/callback" element={<RedirectGoogle />} />
           <Route
             element={
               <ProtectedRoute>
@@ -44,5 +45,5 @@ export default function App() {
       </BrowserRouter>
       <Toaster position="top-right" richColors />
     </QueryClientProvider>
-  )
+  );
 }
