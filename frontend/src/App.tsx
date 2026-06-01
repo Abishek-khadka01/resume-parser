@@ -1,20 +1,21 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Toaster } from '@/components/ui/sonner'
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
-import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import Landing from '@/pages/Landing'
-import Login from '@/pages/Login'
-import Register from '@/pages/Register'
-import Dashboard from '@/pages/Dashboard'
-import Jobs from '@/pages/Jobs'
-import ATS from '@/pages/ATS'
-import Profile from '@/pages/Profile'
-import Alerts from '@/pages/Alerts'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/sonner";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import Landing from "@/pages/Landing";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import Dashboard from "@/pages/Dashboard";
+import Jobs from "@/pages/Jobs";
+import ATS from "@/pages/ATS";
+import Profile from "@/pages/Profile";
+import Alerts from "@/pages/Alerts";
+import RedirectGoogle from "@/pages/RedirectGoogle";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 1000 * 60 * 5 } },
-})
+});
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/auth/google/callback" element={<RedirectGoogle />} />
           <Route
             element={
               <ProtectedRoute>
@@ -42,5 +44,5 @@ export default function App() {
       </BrowserRouter>
       <Toaster position="top-right" richColors />
     </QueryClientProvider>
-  )
+  );
 }

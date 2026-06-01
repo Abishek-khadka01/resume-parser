@@ -19,6 +19,12 @@ class Settings(BaseSettings):
     R2_SECRET_ACCESS_KEY: str = ""
     R2_BUCKET_NAME: str = "resumes"
 
+    GOOGLE_ORIGIN_URL : str
+    GOOGLE_REDIRECT_URL : str
+    GOOGLE_CLIENT_ID : str
+    GOOGLE_CLIENT_SECRET : str
+    SCOPES : str
+
     class Config:
         env_file = ".env"
 
