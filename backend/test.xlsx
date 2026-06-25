@@ -1,0 +1,58 @@
+| Param                   | Example                         |
+| ----------------------- | ------------------------------- |
+| `title_advanced`        | `(data & engineer) & !senior`   |
+| `description_advanced`  | `python & (aws \| azure)`       |
+| `location_advanced`     | `'United States' & !California` |
+| `organization_advanced` | `(Google \| Microsoft)`         |
+| Param                 | Purpose                   | Example                           |
+| --------------------- | ------------------------- | --------------------------------- |
+| `title`               | Search job title          | `Data Engineer`                   |
+| `location`            | Filter by location        | `United States OR United Kingdom` |
+| `time_frame`          | Freshness window          | `24h`, `7d`, `6m`                 |
+| `limit`               | Results per request       | `100`                             |
+| `offset`              | Pagination                | `0`, `100`, `200`                 |
+| `description_format`  | Include description       | `text`                            |
+| `organization`        | Specific company          | `Google`                          |
+| `organization_slug`   | Exact company slug        | `google`                          |
+| `seniority`           | Experience level          | `Entry level`, `Mid-Senior level` |
+| `ai_experience_level` | Years of experience       | `0-2`, `2-5`, `5-10`              |
+| `ai_work_arrangement` | Remote/Hybrid/Onsite      | `Remote Solely`                   |
+| `ai_employment_type`  | Full-time, Contract, etc. | `FULL_TIME`                       |
+| `has_salary`          | Only jobs with salary     |            {/* advanced boolean search */}
+            <div>
+              <button
+                onClick={() => setShowAdvanced(v => !v)}
+                className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
+                {showAdvanced ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                Advanced Boolean Search
+              </button>
+              {showAdvanced && (
+                <div>
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <FilterRow label='Title Advanced  (e.g. "(data & engineer) & !senior")'>
+                    <Input id="li-title-adv" className="h-8 text-xs font-mono" placeholder='(data & engineer) & !senior'
+                      value={titleAdv} onChange={e => setTitleAdv(e.target.value)} />
+                  </FilterRow>
+                  <FilterRow label='Description Advanced  (e.g. "python & (aws | azure)")'>
+                    <Input id="li-desc-adv" className="h-8 text-xs font-mono" placeholder='python & (aws | azure)'
+                      value={descAdv} onChange={e => setDescAdv(e.target.value)} />
+                  </FilterRow>
+                  <FilterRow label="Location Advanced  (e.g. "'United States'")">
+                    <Input id="li-loc-adv" className="h-8 text-xs font-mono" placeholder="'United States'"
+                      value={locAdv} onChange={e => setLocAdv(e.target.value)} />
+                      
+                  </FilterRow>
+
+                  <FilterRow label='Organization Advanced  (e.g. "(Google | Microsoft)")'>
+                    <Input id="li-org-adv" className="h-8 text-xs font-mono" placeholder='(Google | Microsoft)'
+                      value={orgAdv} onChange={e => setOrgAdv(e.target.value)} />
+                  </FilterRow>
+                  <p className="col-span-full text-[11px] text-muted-foreground">
+                    Operators: <code>&amp;</code> (AND) · <code>|</code> (OR) · <code>!</code> (NOT) · use <code>'quotes'</code> for phrases
+                  </p>
+                </div>
+              )}
+            </div>
+ `true`                            |
+| `organization_agency` | Exclude recruiters        | `exclude`                         |
+| `direct_apply`        | Easy Apply jobs           | `only`                            |

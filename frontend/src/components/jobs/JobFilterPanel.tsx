@@ -1,0 +1,330 @@
+import { useState } from "react";
+import { ChevronDown, ChevronUp, DollarSign, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import {
+  SENIORITY_OPTS,
+  TIME_OPTS,
+  WORK_ARR_OPTS,
+  EXP_OPTS,
+  EMP_TYPE_OPTS,
+  LIMIT_OPTS,
+} from "@/constants/linkedinJobs.constants";
+
+function FilterRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-xs font-medium text-muted-foreground">
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+function SimpleSelect({
+  id,
+  value,
+  options,
+  onChange,
+  width = "w-36",
+}: {
+  id: string;
+  value: string;
+  options: { v: string; l: string }[];
+  onChange: (v: string) => void;
+  width?: string;
+}) {
+  return (
+    <Select
+      value={value || "all"}
+      onValueChange={(v) => onChange(v === "all" ? "" : v)}
+    >
+      <SelectTrigger className={cn("h-8 text-xs", width)} id={id}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((o) => (
+          <SelectItem key={o.v} value={o.v || "all"} className="text-xs">
+            {o.l}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function TogglePill({
+  id,
+  active,
+  onClick,
+  children,
+}: {
+  id: string;
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      id={id}
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border font-medium transition-colors",
+        active
+          ? "bg-primary/10 border-primary/30 text-primary"
+          : "border-border text-muted-foreground hover:border-primary/40",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+/* ── props ── */
+interface JobFilterPanelProps {
+  seniority: string;
+  setSeniority: (v: string) => void;
+  timeFrame: string;
+  setTimeFrame: (v: string) => void;
+  workArr: string;
+  setWorkArr: (v: string) => void;
+  expLevel: string;
+  setExpLevel: (v: string) => void;
+  empType: string;
+  setEmpType: (v: string) => void;
+  limit: string;
+  setLimit: (v: string) => void;
+  hasSalary: string;
+  setHasSalary: (v: string) => void;
+  noAgency: string;
+  setNoAgency: (v: string) => void;
+  orgSlug: string;
+  setOrgSlug: (v: string) => void;
+  titleAdv: string;
+  setTitleAdv: (v: string) => void;
+  descAdv: string;
+  setDescAdv: (v: string) => void;
+  locAdv: string;
+  setLocAdv: (v: string) => void;
+  orgAdv: string;
+  setOrgAdv: (v: string) => void;
+  activePillCount: number;
+  onClearAll: () => void;
+  onLimitChange: (v: string) => void;
+}
+
+/* ── main component ── */
+export function JobFilterPanel({
+  seniority,
+  setSeniority,
+  timeFrame,
+  setTimeFrame,
+  workArr,
+  setWorkArr,
+  expLevel,
+  setExpLevel,
+  empType,
+  setEmpType,
+  limit,
+  setLimit,
+  hasSalary,
+  setHasSalary,
+  noAgency,
+  setNoAgency,
+  orgSlug,
+  setOrgSlug,
+  titleAdv,
+  setTitleAdv,
+  descAdv,
+  setDescAdv,
+  locAdv,
+  setLocAdv,
+  orgAdv,
+  setOrgAdv,
+  activePillCount,
+  onClearAll,
+  onLimitChange,
+}: JobFilterPanelProps) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  return (
+    // <div className='flex flex-col gap-2'>
+    <div className="mt-3 rounded-xl border border-border bg-muted/30 p-4 space-y-4">
+      {/* row 1 — select filters */}
+      <div className="flex flex-wrap gap-3">
+        <FilterRow label="Seniority">
+          <SimpleSelect
+            id="li-seniority"
+            value={seniority}
+            options={SENIORITY_OPTS}
+            onChange={setSeniority}
+          />
+        </FilterRow>
+        <FilterRow label="Date Posted">
+          <SimpleSelect
+            id="li-time"
+            value={timeFrame}
+            options={TIME_OPTS}
+            onChange={setTimeFrame}
+          />
+        </FilterRow>
+        <FilterRow label="Work Mode">
+          <SimpleSelect
+            id="li-work-arr"
+            value={workArr}
+            options={WORK_ARR_OPTS}
+            onChange={setWorkArr}
+          />
+        </FilterRow>
+        <FilterRow label="Experience">
+          <SimpleSelect
+            id="li-exp"
+            value={expLevel}
+            options={EXP_OPTS}
+            onChange={setExpLevel}
+          />
+        </FilterRow>
+        <FilterRow label="Employment Type">
+          <SimpleSelect
+            id="li-emp-type"
+            value={empType}
+            options={EMP_TYPE_OPTS}
+            onChange={setEmpType}
+            width="w-40"
+          />
+        </FilterRow>
+        <FilterRow label="Results">
+          <SimpleSelect
+            id="li-limit"
+            value={limit}
+            options={LIMIT_OPTS}
+            onChange={onLimitChange}
+            width="w-32"
+          />
+        </FilterRow>
+      </div>
+
+      {/* row 2 — toggles + org slug */}
+      <div className="flex flex-wrap gap-2 items-center">
+        <TogglePill
+          id="li-has-salary"
+          active={!!hasSalary}
+          onClick={() => setHasSalary(hasSalary ? "" : "true")}
+        >
+          <DollarSign className="h-3 w-3" /> Has Salary
+        </TogglePill>
+        <TogglePill
+          id="li-no-agency"
+          active={!!noAgency}
+          onClick={() => setNoAgency(noAgency ? "" : "exclude")}
+        >
+          <X className="h-3 w-3" /> Exclude Agencies
+        </TogglePill>
+        <div className="relative flex-1 min-w-[160px] max-w-[220px]">
+          <Input
+            id="li-org-slug"
+            className="h-8 text-xs"
+            placeholder="Company slug (e.g. google)"
+            value={orgSlug}
+            onChange={(e) => setOrgSlug(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* advanced boolean search */}
+      <div>
+        <button
+          onClick={() => setShowAdvanced((v) => !v)}
+          className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+        >
+          {showAdvanced ? (
+            <ChevronUp className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronDown className="h-3.5 w-3.5" />
+          )}{" "}
+          Advanced Boolean Search
+        </button>
+
+        {showAdvanced && (
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <FilterRow label="Title Advanced  (e.g. '(data & engineer) & !senior')">
+              <Input
+                id="li-title-adv"
+                className="h-8 text-xs font-mono"
+                placeholder="(data & engineer) & !senior"
+                value={titleAdv}
+                onChange={(e) => setTitleAdv(e.target.value)}
+              />
+            </FilterRow>
+            <FilterRow label='Description Advanced  (e.g. "python & (aws | azure)")'>
+              <Input
+                id="li-desc-adv"
+                className="h-8 text-xs font-mono"
+                placeholder="python & (aws | azure)"
+                value={descAdv}
+                onChange={(e) => setDescAdv(e.target.value)}
+              />
+            </FilterRow>
+            <FilterRow label="Location Advanced  (e.g. '\'United States\' & !California')">
+              <Input
+                type="text"
+                id="li-loc-adv"
+                className="h-8 text-xs font-mono"
+                placeholder="'United States' & !California"
+                value={locAdv}
+                onChange={(e) => setLocAdv(e.target.value)}
+              />
+            </FilterRow>
+            <FilterRow label='Organization Advanced  (e.g. "(Google | Microsoft)")'>
+              <Input
+                type="text"
+                id="li-org-adv"
+                className="h-8 text-xs font-mono"
+                placeholder="(Google | Microsoft)"
+                value={orgAdv}
+                onChange={(e) => setOrgAdv(e.target.value)}
+              />
+            </FilterRow>
+            <p className="col-span-full text-[11px] text-muted-foreground">
+              {"Operators: "}
+              <code>&amp;</code>
+              {" (AND) · "}
+              <code>|</code>
+              {" (OR) · "}
+              <code>!</code>
+              {" (NOT) · use "}
+              <code>{"'quotes'"}</code>
+              {" for phrases"}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {activePillCount > 0 && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-xs text-destructive h-7"
+          onClick={onClearAll}
+        >
+          <X className="h-3.5 w-3.5 mr-1" /> Clear all filters
+        </Button>
+      )}
+    </div>
+  );
+}

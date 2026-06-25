@@ -1,114 +1,203 @@
-import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Search, Bookmark, ExternalLink } from 'lucide-react'
-import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { cn, getMatchColor } from '@/lib/utils'
-import api from '@/lib/api'
-import type { Job } from '@/types'
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Briefcase,
+  GraduationCap,
+  Users,
+  Building2,
+  ArrowRight,
+  Globe,
+} from "lucide-react";
 
-export default function Jobs() {
-  const [search, setSearch] = useState('')
-  const [query, setQuery] = useState('')
-  const queryClient = useQueryClient()
+const LinkedinIcon = ({ size = 30 }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+  >
+    <path d="M20.447 20.452H16.89v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.344V9h3.414v1.561h.049c.476-.9 1.637-1.85 3.369-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.063 2.063 0 110-4.126 2.063 2.063 0 010 4.126zM7.119 20.452H3.555V9h3.564v11.452z" />
+  </svg>
+);
 
-  const { data: jobs, isLoading } = useQuery<Job[]>({
-    queryKey: ['jobs', query],
-    queryFn: () => api.get('/jobs/search', { params: { q: query } }).then((r) => r.data),
-    enabled: true,
-  })
+const Job = () => {
+  const navigate = useNavigate();
 
-  const saveMutation = useMutation({
-    mutationFn: (job: Job) =>
-      api.post('/applications', {
-        job_id: job.job_id,
-        job_title: job.job_title,
-        company_name: job.employer_name,
-        company_logo_url: job.employer_logo,
-        match_score: job.match_score,
-        status: 'saved',
-        job_data: job,
-      }),
-    onSuccess: () => {
-      toast.success('Job saved to ATS board')
-      queryClient.invalidateQueries({ queryKey: ['applications'] })
+  const platforms = [
+    {
+      title: "LinkedIn Jobs",
+      icon: <LinkedinIcon size={30} />,
+      image:
+        "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1200&auto=format&fit=crop",
+      description:
+        "Find jobs, connect with recruiters, and build your professional network.",
+      button: "Visit LinkedIn",
+      link: "/linkedin-jobs",
+      bg: "bg-blue-600",
     },
-    onError: () => toast.error('Failed to save job'),
-  })
+    {
+      title: "Internship Platforms",
+      icon: <GraduationCap size={30} />,
+      image:
+        "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop",
+      description:
+        "Discover internships to gain real-world experience and boost your career.",
+      button: "Explore Internships",
+      link: "/internships",
+      bg: "bg-green-600",
+    },
+    {
+      title: "Other Job Methods",
+      icon: <Globe size={30} />,
+      image:
+        "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1200&auto=format&fit=crop",
+      description:
+        "Use referrals, job fairs, and company career pages to find opportunities.",
+      button: "Learn More",
+      link: "#",
+      bg: "bg-purple-600",
+    },
+  ];
 
   return (
-    <div className="flex h-full gap-6">
-      {/* Left rail filters */}
-      <aside className="w-52 shrink-0 flex flex-col gap-4">
-        <div>
-          <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">Search</p>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Title, skill…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && setQuery(search)}
-              className="h-8 text-sm"
-            />
-            <Button size="sm" variant="outline" onClick={() => setQuery(search)}>
-              <Search className="h-3.5 w-3.5" />
-            </Button>
-          </div>
+    <div className="min-h-screen bg-slate-50">
+      {/* HERO SECTION */}
+      <section className="relative h-[500px] overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1600&auto=format&fit=crop"
+          alt="Jobs"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+
+        <div className="absolute inset-0 bg-black/60" />
+
+        <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center text-white">
+          <h1 className="text-5xl font-bold md:text-6xl">
+            Find Your Dream Job
+          </h1>
+
+          <p className="mt-4 max-w-2xl text-gray-200">
+            Explore jobs, internships, networking, and career opportunities all
+            in one place.
+          </p>
+
+          <button
+            onClick={() => navigate("/")}
+            className="mt-8 rounded-xl bg-white px-6 py-3 font-semibold text-black hover:bg-gray-200"
+          >
+            Back Home
+          </button>
         </div>
-      </aside>
+      </section>
 
-      {/* Job listings */}
-      <div className="flex flex-1 flex-col gap-3">
-        <h2 className="text-lg font-semibold">Matched Jobs</h2>
+      {/* CARDS SECTION */}
+      <section className="mx-auto max-w-7xl px-6 py-20">
+        <h2 className="mb-12 text-center text-4xl font-bold text-slate-800">
+          Job Platforms
+        </h2>
 
-        {isLoading && Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-20 w-full rounded-lg" />
-        ))}
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {platforms.map((item, index) => (
+            <div
+              key={index}
+              className="overflow-hidden rounded-3xl bg-white shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+            >
+              <img
+                src={item.image}
+                alt={item.title}
+                className="h-60 w-full object-cover"
+              />
 
-        {!isLoading && jobs?.map((job) => (
-          <Card key={job.job_id} className="hover:shadow-sm transition-shadow">
-            <CardContent className="flex items-center gap-4 py-4">
-              {job.employer_logo && (
-                <img src={job.employer_logo} alt={job.employer_name} className="h-10 w-10 rounded object-contain" />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="font-medium leading-tight truncate">{job.job_title}</p>
-                <p className="text-sm text-muted-foreground truncate">
-                  {job.employer_name} · {job.job_city ?? job.job_country ?? '—'} · {job.job_is_remote ? 'Remote' : job.job_employment_type}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => saveMutation.mutate(job)}
-                  disabled={saveMutation.isPending}
+              <div className="p-6">
+                <div
+                  className={`inline-flex rounded-xl p-3 text-white ${item.bg}`}
                 >
-                  <Bookmark className="h-4 w-4" />
-                </Button>
-                <a href={job.job_apply_link} target="_blank" rel="noopener noreferrer">
-                  <Button size="sm" variant="outline">
-                    <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-                    Apply
-                  </Button>
-                </a>
-                {job.match_score != null && (
-                  <span className={cn('inline-flex items-center rounded-md border px-2 py-1 text-xs font-semibold', getMatchColor(job.match_score))}>
-                    {job.match_score}%
-                  </span>
+                  {item.icon}
+                </div>
+
+                <h3 className="mt-4 text-2xl font-bold text-slate-800">
+                  {item.title}
+                </h3>
+
+                <p className="mt-3 text-gray-600">{item.description}</p>
+
+                {item.link !== "#" ? (
+                  <a
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`mt-6 inline-flex items-center gap-2 rounded-lg px-5 py-3 text-white ${item.bg}`}
+                  >
+                    {item.button}
+                    <ArrowRight size={18} />
+                  </a>
+                ) : (
+                  <button
+                    className={`mt-6 inline-flex items-center gap-2 rounded-lg px-5 py-3 text-white ${item.bg}`}
+                  >
+                    {item.button}
+                    <ArrowRight size={18} />
+                  </button>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        ))}
+            </div>
+          ))}
+        </div>
+      </section>
 
-        {!isLoading && !jobs?.length && (
-          <p className="text-sm text-muted-foreground">No jobs found. Try a different search.</p>
-        )}
-      </div>
+      {/* EXTRA METHODS */}
+      <section className="bg-white py-20">
+        <div className="mx-auto max-w-6xl px-6">
+          <h2 className="mb-12 text-center text-4xl font-bold text-slate-800">
+            More Ways to Get Jobs
+          </h2>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            <div className="rounded-3xl border p-8 text-center">
+              <Building2 className="mx-auto mb-4 text-blue-600" size={50} />
+              <h3 className="text-xl font-semibold">Company Websites</h3>
+              <p className="mt-2 text-gray-600">
+                Apply directly from company career pages.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border p-8 text-center">
+              <Users className="mx-auto mb-4 text-green-600" size={50} />
+              <h3 className="text-xl font-semibold">Networking</h3>
+              <p className="mt-2 text-gray-600">
+                Connect with professionals and get referrals.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border p-8 text-center">
+              <Briefcase className="mx-auto mb-4 text-purple-600" size={50} />
+              <h3 className="text-xl font-semibold">Job Fairs</h3>
+              <p className="mt-2 text-gray-600">
+                Meet recruiters and explore opportunities.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="bg-slate-900 py-20 text-center text-white">
+        <h2 className="text-4xl font-bold">Start Your Career Today</h2>
+
+        <p className="mt-4 text-gray-300">
+          Build your resume and apply consistently.
+        </p>
+
+        <button
+          onClick={() => navigate("/resume")}
+          className="mt-8 rounded-xl bg-blue-600 px-8 py-4 font-semibold hover:bg-blue-700"
+        >
+          Create Resume
+        </button>
+      </section>
     </div>
-  )
-}
+  );
+};
+
+export default Job;

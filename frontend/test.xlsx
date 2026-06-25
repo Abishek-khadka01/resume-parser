@@ -1,0 +1,23 @@
+| Param                 | Purpose                   | Example                           |
+| --------------------- | ------------------------- | --------------------------------- |
+| `title`               | Search job title          | `Data Engineer`                   |
+| `location`            | Filter by location        | `United States OR United Kingdom` |
+| `time_frame`          | Freshness window          | `24h`, `7d`, `6m`                 |
+| `limit`               | Results per request       | `100`                             |
+| `offset`              | Pagination                | `0`, `100`, `200`                 |
+| `description_format`  | Include description       | `text`                            |
+| `organization`        | Specific company          | `Google`                          |
+| `organization_slug`   | Exact company slug        | `google`                          |
+| `seniority`           | Experience level          | `Entry level`, `Mid-Senior level` |
+| `ai_experience_level` | Years of experience       | `0-2`, `2-5`, `5-10`              |
+| `ai_work_arrangement` | Remote/Hybrid/Onsite      | `Remote Solely`                   |
+| `ai_employment_type`  | Full-time, Contract, etc. | `FULL_TIME`                       |
+| `has_salary`          | Only jobs with salary     | `true`                            |
+| `organization_agency` | Exclude recruiters        | `exclude`                         |
+| `direct_apply`        | Easy Apply jobs           | `only`                            |
+| Param                   | Example                         |
+| ----------------------- | ------------------------------- |
+| `title_advanced`        | `(data & engineer) & !senior`   |
+| `description_advanced`  | `python & (aws \| azure)`       |
+| `location_advanced`     | `'United States' & !California` |
+| `organization_advanced` | `(Google \| Microsoft)`         |
