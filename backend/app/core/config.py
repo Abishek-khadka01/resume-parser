@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic_settings import SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -9,7 +10,11 @@ class Settings(BaseSettings):
 
     ANTHROPIC_API_KEY: str
     RAPIDAPI_KEY: str
-    RAPIDAPI_HOST: str = "jsearch.p.rapidapi.com"
+    RAPIDAPI_HOST: str = "linkedin-job-search-api.p.rapidapi.com"
+    LINKEDIN_JOBS_RAPIDAPI_HOST: str = "linkedin-job-search-api.p.rapidapi.com"
+    LINKED_IN_RAPID_API_KEY: str | None = None
+    LINKED_IN_RAPID_API_HOST: str | None = None
+    BASE_RAPID_REQUEST_URL: str = "https://linkedin-job-search-api.p.rapidapi.com"
 
     RESEND_API_KEY: str
     EMAIL_FROM: str = "alerts@resumematch.app"
@@ -25,8 +30,7 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET : str
     SCOPES : str
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
 settings = Settings()

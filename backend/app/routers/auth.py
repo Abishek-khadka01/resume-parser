@@ -35,7 +35,7 @@ def userLogin(request : UserLogin, db : Session = Depends(get_db)):
     if not user: 
         raise HTTPException(status_code=400, detail='User do not exists')
     print(user)
-    checkpassword : bool = verify_password(request.password, user['password_hash'] )
+    checkpassword : bool = verify_password(request.password, user.password_hash )
     
     if not checkpassword:
         raise HTTPException(status_code=400, detail="Invalid Credentials")
