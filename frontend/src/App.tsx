@@ -12,6 +12,7 @@ import ATS from "@/pages/ATS";
 import Profile from "@/pages/Profile";
 import Alerts from "@/pages/Alerts";
 import RedirectGoogle from "@/pages/RedirectGoogle";
+import LinkedInJobs from "@/pages/LinkedInJobs";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 1000 * 60 * 5 } },
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="/ats" element={<ATS />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/alerts" element={<Alerts />} />
+            <Route path="/linkedin-jobs" element={<LinkedInJobs />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
