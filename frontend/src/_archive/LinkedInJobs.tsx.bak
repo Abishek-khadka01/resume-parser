@@ -112,7 +112,7 @@ const LIMIT_OPTS = [
   { v: "100", l: "100 results" },
 ];
 
-function sp(params: URLSearchParams, key: string, fallback = "") {
+function sp(params: URLSearchParams, key: string, fallback = ""): string {
   return params.get(key) ?? fallback;
 }
 
@@ -171,19 +171,19 @@ export default function LinkedInJobs() {
   const [section, setSection] = useState<SectionKey>(
     (sp(searchParams, "section") as SectionKey) || "jobs",
   );
-  const [seniority, setSeniority] = useState(sp(searchParams, "seniority"));
-  const [timeFrame, setTimeFrame] = useState(sp(searchParams, "time_frame"));
-  const [workArr, setWorkArr] = useState(
-    sp(searchParams, "ai_work_arrangement"),
+  const [seniority, setSeniority] = useState<string>(sp(searchParams, "seniority"));
+  const [timeFrame, setTimeFrame] = useState<string>(sp(searchParams, "time_frame"));
+  const [workArr, setWorkArr] = useState<string>(
+    sp(searchParams, "work_arrangement")
   );
-  const [expLevel, setExpLevel] = useState(
-    sp(searchParams, "ai_experience_level"),
+  const [expLevel, setExpLevel] = useState<string>(
+    sp(searchParams, "experience_level")
   );
-  const [empType, setEmpType] = useState(
-    sp(searchParams, "ai_employment_type"),
+  const [empType, setEmpType] = useState<string>(
+    sp(searchParams, "employment_type")
   );
-  const [limit, setLimit] = useState(sp(searchParams, "limit", "25"));
-  const [offset, setOffset] = useState(sp(searchParams, "offset", "0"));
+  const [limit, setLimit] = useState<string>(sp(searchParams, "limit", "25"));
+  const [offset, setOffset] = useState<string>(sp(searchParams, "offset", "0"));
   const [hasSalary, setHasSalary] = useState(sp(searchParams, "has_salary"));
   const [noAgency, setNoAgency] = useState(
     sp(searchParams, "organization_agency"),
@@ -417,7 +417,7 @@ export default function LinkedInJobs() {
               <FilterRow label="Seniority">
                 <Select
                   value={seniority || "all"}
-                  onValueChange={(v) => setSeniority(v === "all" ? "" : v)}
+                  onValueChange={(v: string | null) => setSeniority(v === null || v === "all" ? "" : v)}
                 >
                   <SelectTrigger className="h-8 w-36 text-xs">
                     <SelectValue />
@@ -438,7 +438,7 @@ export default function LinkedInJobs() {
               <FilterRow label="Date Posted">
                 <Select
                   value={timeFrame || "all"}
-                  onValueChange={(v) => setTimeFrame(v === "all" ? "" : v)}
+                  onValueChange={(v: string | null) => setTimeFrame(v === null || v === "all" ? "" : v)}
                 >
                   <SelectTrigger className="h-8 w-36 text-xs">
                     <SelectValue />
@@ -459,7 +459,7 @@ export default function LinkedInJobs() {
               <FilterRow label="Work Mode">
                 <Select
                   value={workArr || "all"}
-                  onValueChange={(v) => setWorkArr(v === "all" ? "" : v)}
+                  onValueChange={(v: string | null) => setWorkArr(v === null || v === "all" ? "" : v)}
                 >
                   <SelectTrigger className="h-8 w-36 text-xs">
                     <SelectValue />
@@ -480,7 +480,7 @@ export default function LinkedInJobs() {
               <FilterRow label="Experience">
                 <Select
                   value={expLevel || "all"}
-                  onValueChange={(v) => setExpLevel(v === "all" ? "" : v)}
+                  onValueChange={(v: string | null) => setExpLevel(v === null || v === "all" ? "" : v)}
                 >
                   <SelectTrigger className="h-8 w-36 text-xs">
                     <SelectValue />
@@ -501,7 +501,7 @@ export default function LinkedInJobs() {
               <FilterRow label="Employment Type">
                 <Select
                   value={empType || "all"}
-                  onValueChange={(v) => setEmpType(v === "all" ? "" : v)}
+                  onValueChange={(v: string | null) => setEmpType(v === null || v === "all" ? "" : v)}
                 >
                   <SelectTrigger className="h-8 w-40 text-xs">
                     <SelectValue />
@@ -522,8 +522,8 @@ export default function LinkedInJobs() {
               <FilterRow label="Results">
                 <Select
                   value={limit}
-                  onValueChange={(v) => {
-                    setLimit(v);
+                  onValueChange={(v: string | null) => {
+                    setLimit(v ?? "");
                     setOffset("0");
                   }}
                 >
