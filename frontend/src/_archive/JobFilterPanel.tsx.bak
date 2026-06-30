@@ -52,7 +52,7 @@ function SimpleSelect({
   return (
     <Select
       value={value || "all"}
-      onValueChange={(v) => onChange(v === "all" ? "" : v)}
+      onValueChange={(v: string | null) => onChange(v === null || v === "all" ? "" : v)}
     >
       <SelectTrigger className={cn("h-8 text-xs", width)} id={id}>
         <SelectValue />
@@ -141,7 +141,6 @@ export function JobFilterPanel({
   empType,
   setEmpType,
   limit,
-  setLimit,
   hasSalary,
   setHasSalary,
   noAgency,

@@ -20,8 +20,7 @@ export interface NavbarProps {
 const navItems = [
   { to: '/', label: 'Home', protected: false },
   { to: '/dashboard', label: 'Dashboard', protected: true },
-  { to: '/jobs', label: 'Jobs', protected: true },
-  { to: '/ats', label: 'ATS Board', protected: true },
+  { to: '/job-board', label: 'Job Board', protected: true },
 ]
 
 export function Navbar({ onSearch }: NavbarProps) {
@@ -73,7 +72,7 @@ export function Navbar({ onSearch }: NavbarProps) {
 
   const handleProfileNavigation = () => {
     setProfileDropdownOpen(false)
-    navigate('/profile')
+    navigate('/profile-setup')
   }
 
   const handleLogout = () => {
@@ -130,9 +129,9 @@ export function Navbar({ onSearch }: NavbarProps) {
           ))}
 
           <Link
-            to="/alerts"
+            to="/dashboard"
             className="text-sm lg:text-base font-semibold tracking-wide transition-all duration-300 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-white py-1 text-white/80 hover:text-white hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.2)]"
-            aria-label="Alerts"
+            aria-label="Notifications"
           >
             <FontAwesomeIcon icon={faBell} className="w-4 h-4" />
           </Link>
@@ -261,21 +260,13 @@ export function Navbar({ onSearch }: NavbarProps) {
                 {item.label}
               </Link>
             ))}
-            <Link
-              to="/alerts"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="px-4 py-2.5 rounded-lg text-sm font-semibold transition-all text-white/75 hover:bg-white/5 hover:text-white flex items-center gap-2"
-            >
-              <FontAwesomeIcon icon={faBell} className="w-4 h-4" />
-              Alerts
-            </Link>
           </div>
 
           {isLoggedIn ? (
             <div className="flex flex-col gap-2 border-t border-white/10 pt-3">
               <div className="px-2 text-xs text-white/50">Signed in as {user?.email}</div>
               <Link
-                to="/profile"
+                to="/profile-setup"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white/75 hover:bg-white/5 hover:text-white transition-all"
               >
