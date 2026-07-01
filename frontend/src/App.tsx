@@ -1,4 +1,10 @@
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -10,6 +16,7 @@ import Dashboard from "@/pages/Dashboard";
 import JobBoard from "@/pages/JobBoard";
 import ProfileSetup from "@/pages/ProfileSetup";
 import RedirectGoogle from "@/pages/RedirectGoogle";
+import { AuthModal } from "./components/auth/AuthModal";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 1000 * 60 * 5 } },
