@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { User, Profile, Job, Application, ApplicationStatus, JobAlert, JobSearchResponse, AtsAnalysis, Suggestion } from '@/types'
+import type { User, Profile, Job, Application, ApplicationStatus, JobAlert, JobSearchResponse, AtsAnalysis, Suggestion, ResumeOptimization } from '@/types'
 
 const client = axios.create({
   baseURL: '/api',
@@ -67,6 +67,16 @@ export async function downloadEnhancedResume(acceptedSuggestions?: Suggestion[])
     { accepted_suggestions: acceptedSuggestions },
     { responseType: 'blob' }
   )
+  return res.data as Blob
+}
+
+export async function getResumeOptimization(job: Job) {
+  const res = await client.post('/jobs/optimize-resume', { job })
+  return res.data as ResumeOptimization
+}
+
+export async function downloadOptimizedResume(job: Job) {
+  const res = await client.post('/resume/optimized-pdf', { job }, { responseType: 'blob' })
   return res.data as Blob
 }
 

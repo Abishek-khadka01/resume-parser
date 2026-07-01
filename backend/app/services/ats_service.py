@@ -1,10 +1,22 @@
+import asyncio
+import os
+
+from app.core.config import settings
+
+if settings.HF_TOKEN:
+    os.environ.setdefault("HF_TOKEN", settings.HF_TOKEN)
+
+from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from app.services import skill_service
 
-SKILL_WEIGHT = 0.6
-TEXT_WEIGHT = 0.4
+SKILL_WEIGHT = 0.5
+TEXT_WEIGHT = 0.25
+SEMANTIC_WEIGHT = 0.25
+
+_semantic_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 
 def _resume_text(profile) -> str:
@@ -79,9 +91,25 @@ def _text_similarity_batch(resume_text: str, job_texts: list[str]) -> list[float
     return [float(s) for s in sims]
 
 
-def _blend(skill_score: float, text_score: float) -> int:
-    combined = SKILL_WEIGHT * skill_score + TEXT_WEIGHT * text_score
-    return round(100 * max(0.0, min(1.0, combined)))
+def _semantic_similarity_batch_sync(resume_text: str, job_texts: list[str]) -> list[float]:
+    if not resume_text.strip() or not any(t.strip() for t in job_texts):
+        return [0.0] * len(job_texts)
+    embeddings = _semantic_model.encode([resume_text] + job_texts)
+    resume_vec = embeddings[0:1]
+    job_vecs = embeddings[1:]
+    sims = cosine_similarity(resume_vec, job_vecs)[0]
+    return [float(max(0.0, s)) for s in sims]
+
+
+async def _semantic_similarity_batch(resume_text: str, job_texts: list[str]) -> list[float]:
+    # sentence-transformers encoding is CPU-bound; offload so it doesn't block the event loop
+    return await asyncio.to_thread(_semantic_similarity_batch_sync, resume_text, job_texts)
+
+
+def _blend(skill_score: float, text_score: float, semantic_score: float) -> int:
+    combined = SKILL_WEIGHT * skill_score + TEXT_WEIGHT * text_score + SEMANTIC_WEIGHT * semantic_score
+    combined = max(0.0, min(1.0, combined))
+    return round(1 + 9 * combined)
 
 
 async def score_jobs_batch(jobs: list[dict], profile) -> list[dict]:
@@ -92,31 +120,35 @@ async def score_jobs_batch(jobs: list[dict], profile) -> list[dict]:
     profile_skills_lower = {s.strip().lower() for s in (profile.skills or [])}
     job_texts = [_job_text(job) for job in jobs]
     text_scores = _text_similarity_batch(resume_text, job_texts)
+    semantic_scores = await _semantic_similarity_batch(resume_text, job_texts)
 
-    for job, text_score in zip(jobs, text_scores):
+    for job, text_score, semantic_score in zip(jobs, text_scores, semantic_scores):
         skill_score, _, _ = _skill_overlap(job, profile_skills_lower)
-        job["match_score"] = _blend(skill_score, text_score)
+        job["match_score"] = _blend(skill_score, text_score, semantic_score)
 
     jobs.sort(key=lambda j: j.get("match_score", 0), reverse=True)
     return jobs
 
 
-def analyze_job(job: dict, profile) -> dict:
+async def analyze_job(job: dict, profile) -> dict:
     resume_text = _resume_text(profile)
     profile_skills_lower = {s.strip().lower() for s in (profile.skills or [])}
     job_text = _job_text(job)
 
     text_scores = _text_similarity_batch(resume_text, [job_text])
     text_score = text_scores[0] if text_scores else 0.0
+    semantic_scores = await _semantic_similarity_batch(resume_text, [job_text])
+    semantic_score = semantic_scores[0] if semantic_scores else 0.0
     skill_score, matched_lower, missing_lower = _skill_overlap(job, profile_skills_lower)
 
     matched_categorized = skill_service.categorize_skills(list(matched_lower))
     missing_categorized = skill_service.categorize_skills(list(missing_lower))
 
     return {
-        "score": _blend(skill_score, text_score),
+        "score": _blend(skill_score, text_score, semantic_score),
         "skill_score": round(skill_score, 4),
         "text_score": round(text_score, 4),
+        "semantic_score": round(semantic_score, 4),
         "matched_skills": matched_categorized,
         "missing_skills": missing_categorized,
     }

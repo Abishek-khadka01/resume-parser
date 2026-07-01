@@ -8,10 +8,11 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
-    GEMINI_API_KEY: str
-    GEMINI_MODEL: str = "gemini-3.5-flash"
+    GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "llama-3.3-70b-versatile"
     OPENROUTER_API_KEY: str = ""
-    OPENROUTER_MODEL: str = "deepseek/deepseek-chat-v3.1:free"
+    OPENROUTER_MODEL: str = "google/gemma-4-26b-a4b-it:free"
+    HF_TOKEN: str = ""
     RAPIDAPI_KEY: str
     JSEARCH_RAPIDAPI_HOST: str = "jsearch.p.rapidapi.com"
     JSEARCH_BASE_URL: str = "https://jsearch.p.rapidapi.com"

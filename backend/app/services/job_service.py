@@ -38,6 +38,7 @@ async def search_jobs(
     job_requirements: str | None = None,
     radius: int | None = None,
     cursor: str | None = None,
+    num_pages: int = 3,
 ) -> tuple[list, str | None]:
     params = _clean_params(
         {
@@ -48,6 +49,7 @@ async def search_jobs(
             "job_requirements": job_requirements,
             "radius": radius,
             "cursor": cursor,
+            "num_pages": num_pages,
         }
     )
     cache_key = repr(sorted(params.items()))
@@ -56,23 +58,29 @@ async def search_jobs(
         if time() - ts < CACHE_TTL:
             return jobs, next_cursor
 
-    async with httpx.AsyncClient(timeout=15) as client:
-        try:
-            resp = await client.get(
-                f"{settings.JSEARCH_BASE_URL.rstrip('/')}{SEARCH_PATH}",
-                params=params,
-                headers={
-                    "x-rapidapi-key": settings.RAPIDAPI_KEY,
-                    "x-rapidapi-host": settings.JSEARCH_RAPIDAPI_HOST,
-                },
-            )
-            resp.raise_for_status()
-            data = resp.json()
-        except httpx.HTTPStatusError as exc:
-            detail = exc.response.text[:500]
-            raise JobSearchError(f"JSearch job search failed: {exc.response.status_code} {detail}") from exc
-        except httpx.HTTPError as exc:
-            raise JobSearchError(f"JSearch job search request failed: {exc}") from exc
+    async with httpx.AsyncClient(timeout=30) as client:
+        last_exc: httpx.HTTPError | None = None
+        data = None
+        for attempt in range(2):
+            try:
+                resp = await client.get(
+                    f"{settings.JSEARCH_BASE_URL.rstrip('/')}{SEARCH_PATH}",
+                    params=params,
+                    headers={
+                        "x-rapidapi-key": settings.RAPIDAPI_KEY,
+                        "x-rapidapi-host": settings.JSEARCH_RAPIDAPI_HOST,
+                    },
+                )
+                resp.raise_for_status()
+                data = resp.json()
+                break
+            except httpx.HTTPStatusError as exc:
+                detail = exc.response.text[:500]
+                raise JobSearchError(f"JSearch job search failed: {exc.response.status_code} {detail}") from exc
+            except httpx.HTTPError as exc:
+                last_exc = exc
+        if data is None:
+            raise JobSearchError(f"JSearch job search request failed after retry: {last_exc!r}") from last_exc
 
     payload = data.get("data", {}) if isinstance(data, dict) else {}
     jobs = payload.get("jobs", []) if isinstance(payload, dict) else []

@@ -40,6 +40,8 @@ class ProfileOut(BaseModel):
     skills_categorized: Optional[Dict[str, List[str]]] = None
     completeness_pct: int = 0
     resume_url: Optional[str] = None
+    resume_uploaded: bool = False
+    resume_locked_fields: List[str] = []
     work_experience: List[WorkExperienceOut] = []
     education: List[EducationOut] = []
     model_config = {"from_attributes": True}

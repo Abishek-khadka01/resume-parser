@@ -34,6 +34,7 @@ export default function JobCard({ job, onSave, onViewDetails, saved, index = 0 }
 
   const timeAgo = (dateStr?: string) => {
     if (!dateStr) return null
+    // eslint-disable-next-line react-hooks/purity -- relative time display is inherently render-time dependent
     const diff = Date.now() - new Date(dateStr).getTime()
     const hours = Math.floor(diff / 3600000)
     if (hours < 1) return 'Just now'
@@ -59,7 +60,7 @@ export default function JobCard({ job, onSave, onViewDetails, saved, index = 0 }
             className="w-12 h-12 rounded-xl object-contain border border-slate-100 shrink-0"
           />
         ) : (
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#4a0080] to-[#74007a] flex items-center justify-center text-white text-lg font-bold shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-linear-to-br from-[#4a0080] to-primary flex items-center justify-center text-white text-lg font-bold shrink-0">
             {job.employer_name?.charAt(0) ?? 'J'}
           </div>
         )}
@@ -85,18 +86,18 @@ export default function JobCard({ job, onSave, onViewDetails, saved, index = 0 }
                 <circle
                   cx="18" cy="18" r="15.5"
                   fill="none"
-                  stroke={job.match_score >= 70 ? '#059669' : job.match_score >= 40 ? '#d97706' : '#dc2626'}
+                  stroke={job.match_score >= 8 ? '#059669' : job.match_score >= 5 ? '#d97706' : '#dc2626'}
                   strokeWidth="3"
-                  strokeDasharray={`${(job.match_score / 100) * 97} 97`}
+                  strokeDasharray={`${(job.match_score / 10) * 97} 97`}
                   strokeLinecap="round"
                 />
               </svg>
               <span className="absolute inset-0 flex items-center justify-center text-xs font-bold"
                 style={{
-                  color: job.match_score >= 70 ? '#059669' : job.match_score >= 40 ? '#d97706' : '#dc2626'
+                  color: job.match_score >= 8 ? '#059669' : job.match_score >= 5 ? '#d97706' : '#dc2626'
                 }}
               >
-                {job.match_score}%
+                {job.match_score}/10
               </span>
             </div>
             <span className="text-[10px] text-slate-400 font-medium mt-0.5">Match</span>
@@ -145,7 +146,7 @@ export default function JobCard({ job, onSave, onViewDetails, saved, index = 0 }
           href={job.job_apply_link}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 h-9 px-5 rounded-full bg-gradient-to-r from-[#4a0080] via-[#74007a] to-[#da70dc] hover:from-[#da70dc] hover:via-[#74007a] hover:to-[#4a0080] text-white text-xs font-bold tracking-wide shadow-sm transition-all duration-300"
+          className="inline-flex items-center gap-2 h-9 px-5 rounded-full bg-linear-to-r from-[#4a0080] via-primary to-secondary hover:from-secondary hover:via-primary hover:to-[#4a0080] text-white text-xs font-bold tracking-wide shadow-sm transition-all duration-300"
         >
           <FontAwesomeIcon icon={faExternalLinkAlt} className="w-3 h-3" />
           Apply
@@ -156,8 +157,8 @@ export default function JobCard({ job, onSave, onViewDetails, saved, index = 0 }
           className={cn(
             'inline-flex items-center gap-2 h-9 px-5 rounded-full text-xs font-bold border transition-all duration-300 cursor-pointer',
             saved
-              ? 'bg-[#74007a]/8 text-[#74007a] border-[#74007a]/20'
-              : 'bg-white text-slate-600 border-slate-200 hover:border-[#74007a]/30 hover:text-[#74007a]'
+              ? 'bg-primary/8 text-primary border-primary/20'
+              : 'bg-white text-slate-600 border-slate-200 hover:border-primary/30 hover:text-primary'
           )}
         >
           <FontAwesomeIcon icon={saved ? faCheckCircle : faBookmark} className="w-3 h-3" />
@@ -167,12 +168,12 @@ export default function JobCard({ job, onSave, onViewDetails, saved, index = 0 }
         {job.match_score != null && (
           <button
             onClick={() => onViewDetails?.(job)}
-            className="ml-auto inline-flex items-center gap-2 h-9 px-4 rounded-full text-xs font-semibold text-slate-500 hover:text-[#74007a] hover:bg-[#74007a]/8 border border-slate-200 hover:border-[#74007a]/20 transition-all duration-200 cursor-pointer"
+            className="ml-auto inline-flex items-center gap-2 h-9 px-4 rounded-full text-xs font-semibold text-slate-500 hover:text-primary hover:bg-primary/8 border border-slate-200 hover:border-primary/20 transition-all duration-200 cursor-pointer"
             title="ATS Analysis"
           >
             <FontAwesomeIcon icon={faChartLine} className="w-3 h-3" />
             <span className={cn('font-bold', getMatchColor(job.match_score))}>
-              {job.match_score}% match
+              {job.match_score}/10 match
             </span>
           </button>
         )}

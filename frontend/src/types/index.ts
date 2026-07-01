@@ -21,6 +21,8 @@ export interface Profile {
   skills: string[];
   completeness_pct: number;
   resume_url?: string;
+  resume_uploaded: boolean;
+  resume_locked_fields: string[];
   work_experience: WorkExperience[];
   education: Education[];
 }
@@ -80,9 +82,39 @@ export interface AtsAnalysis {
   score: number;
   skill_score: number;
   text_score: number;
+  semantic_score: number;
   matched_skills: Record<string, string[]>;
   missing_skills: Record<string, string[]>;
   suggestions: Suggestion[];
+}
+
+export interface OptimizedExperience {
+  id: string;
+  title: string;
+  company: string;
+  start_date?: string;
+  end_date?: string;
+  description: string;
+}
+
+export interface ResumeChange {
+  type: "skill_emphasized" | "skill_added_to_skills_list" | "quantify_suggestion" | "skills_reordered";
+  category?: string;
+  keyword?: string;
+  experience_id?: string;
+  experience_title?: string;
+  before?: string;
+  after?: string;
+  added_sentence?: string;
+  message?: string;
+}
+
+export interface ResumeOptimization {
+  score_before: number;
+  score_after: number;
+  changes: ResumeChange[];
+  optimized_skills_categorized: Record<string, string[]>;
+  optimized_experience: OptimizedExperience[];
 }
 
 export type ApplicationStatus =
@@ -124,89 +156,3 @@ export interface AuthTokens {
   access_token: string;
   token_type: string;
 }
-
-export type LinkedInJob = {
-  id: string;
-  date_posted: string;
-  date_created: string;
-  title: string;
-  organization: string;
-  organization_url: string;
-  date_validthrough: string | null;
-
-  locations_raw: {
-    "@type": string;
-    address: {
-      "@type": string;
-      addressRegion: string | null;
-      addressCountry: string | null;
-      addressLocality: string | null;
-      streetAddress?: string | null;
-    };
-    latitude?: number;
-    longitude?: number;
-  }[];
-
-  location_type: string | null;
-  location_requirements_raw: any[] | null;
-
-  salary_raw: {
-    "@type": string;
-    currency: string;
-    value: {
-      "@type": string;
-      minValue: number;
-      maxValue: number;
-      unitText: string;
-    };
-  } | null;
-
-  employment_type: string[];
-
-  url: string;
-  source_type: string;
-  source: string;
-  source_domain: string;
-
-  organization_logo: string;
-
-  cities_derived: string[] | null;
-  counties_derived: string[] | null;
-  regions_derived: string[] | null;
-  countries_derived: string[];
-  locations_derived: string[];
-  timezones_derived: string[];
-
-  lats_derived: number[];
-  lngs_derived: number[];
-
-  remote_derived: boolean;
-
-  linkedin_org_employees: number | null;
-  linkedin_org_url: string;
-  linkedin_org_size: string;
-  linkedin_org_slogan: string | null;
-  linkedin_org_industry: string;
-  linkedin_org_followers: number | null;
-  linkedin_org_headquarters: string;
-  linkedin_org_type: string;
-  linkedin_org_foundeddate: string;
-
-  linkedin_org_specialties: string[];
-  linkedin_org_locations: string[];
-  linkedin_org_description: string;
-
-  linkedin_org_recruitment_agency_derived: boolean;
-
-  seniority: string;
-  directapply: boolean;
-
-  linkedin_org_slug: string;
-
-  no_jb_schema: boolean | null;
-
-  external_apply_url: string | null;
-  ats_duplicate: boolean | null;
-
-  description_text: string;
-};

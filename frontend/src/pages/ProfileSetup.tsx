@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -49,13 +49,34 @@ const schema = z.object({
 })
 type FormFields = z.infer<typeof schema>
 
+const UPLOAD_STAGES = [
+  'Reading your document...',
+  'Extracting skills and experience with AI...',
+  'Still working — the AI service can be slow during busy periods...',
+  'Almost there, hang tight...',
+]
+
 export default function ProfileSetup() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [uploadStage, setUploadStage] = useState(0)
+  const [uploadSeconds, setUploadSeconds] = useState(0)
   const [dragOver, setDragOver] = useState(false)
   const [inputMode, setInputMode] = useState<'upload' | 'manual'>('upload')
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!uploading) return
+    const tick = setInterval(() => setUploadSeconds((s) => s + 1), 1000)
+    const stageTimers = UPLOAD_STAGES.map((_, i) =>
+      setTimeout(() => setUploadStage(i), i * 8000)
+    )
+    return () => {
+      clearInterval(tick)
+      stageTimers.forEach(clearTimeout)
+    }
+  }, [uploading])
 
   const { data: profile, isLoading } = useQuery<ProfileType>({
     queryKey: ['profile'],
@@ -110,6 +131,8 @@ export default function ProfileSetup() {
       toast.error('Please upload a PDF or DOCX file')
       return
     }
+    setUploadStage(0)
+    setUploadSeconds(0)
     setUploading(true)
     try {
       await uploadResume(file)
@@ -141,6 +164,9 @@ export default function ProfileSetup() {
   const handleUploadClick = () => fileRef.current?.click()
 
   const skillsList = profile?.skills ?? []
+  const lockedFields = new Set(profile?.resume_locked_fields ?? [])
+  const anyFieldLocked = lockedFields.size > 0
+  const lockedInputClass = 'disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed disabled:border-slate-200'
 
   if (isLoading) {
     return (
@@ -181,8 +207,8 @@ export default function ProfileSetup() {
               onClick={handleUploadClick}
               className={`rounded-2xl border-2 border-dashed p-8 text-center cursor-pointer transition-all duration-200 ${
                 dragOver
-                  ? 'border-[#74007a] bg-[#74007a]/5'
-                  : 'border-slate-200 bg-white hover:border-[#74007a]/30 hover:bg-[#74007a]/3'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-slate-200 bg-white hover:border-primary/30 hover:bg-primary/3'
               }`}
             >
               <input
@@ -197,13 +223,14 @@ export default function ProfileSetup() {
               />
               {uploading ? (
                 <div className="flex flex-col items-center gap-3">
-                  <FontAwesomeIcon icon={faSpinner} className="w-10 h-10 text-[#74007a] animate-spin" />
-                  <p className="text-sm font-semibold text-slate-600">Parsing your resume...</p>
+                  <FontAwesomeIcon icon={faSpinner} className="w-10 h-10 text-primary animate-spin" />
+                  <p className="text-sm font-semibold text-slate-600">{UPLOAD_STAGES[uploadStage]}</p>
+                  <p className="text-xs text-slate-400">{uploadSeconds}s elapsed</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-3">
-                  <div className="w-16 h-16 rounded-full bg-[#74007a]/8 flex items-center justify-center mx-auto">
-                    <FontAwesomeIcon icon={faCloudUploadAlt} className="w-7 h-7 text-[#74007a]" />
+                  <div className="w-16 h-16 rounded-full bg-primary/8 flex items-center justify-center mx-auto">
+                    <FontAwesomeIcon icon={faCloudUploadAlt} className="w-7 h-7 text-primary" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-slate-700">
@@ -241,10 +268,15 @@ export default function ProfileSetup() {
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex items-center gap-2.5 mb-6">
-              <div className="w-9 h-9 rounded-xl bg-[#74007a]/8 flex items-center justify-center">
-                <FontAwesomeIcon icon={faUser} className="w-4 h-4 text-[#74007a]" />
+              <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center">
+                <FontAwesomeIcon icon={faUser} className="w-4 h-4 text-primary" />
               </div>
-              <h3 className="text-base font-bold text-slate-900">Personal Information</h3>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Personal Information</h3>
+                {anyFieldLocked && (
+                  <p className="text-xs text-slate-400 mt-0.5">Fields filled from your resume are locked — upload a new resume to change them</p>
+                )}
+              </div>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
@@ -253,16 +285,16 @@ export default function ProfileSetup() {
                   <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Full Name</label>
                   <div className="relative">
                     <FontAwesomeIcon icon={faUser} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input placeholder="Your full name" {...register('full_name')}
-                      className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#74007a] focus:ring-2 focus:ring-[#74007a]/20 transition-all" />
+                    <input placeholder="Your full name" disabled={lockedFields.has('full_name')} {...register('full_name')}
+                      className={`w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
                   </div>
                 </div>
                 <div>
                   <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Phone</label>
                   <div className="relative">
                     <FontAwesomeIcon icon={faPhone} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input placeholder="+977 98XXXXXXXX" {...register('phone')}
-                      className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#74007a] focus:ring-2 focus:ring-[#74007a]/20 transition-all" />
+                    <input placeholder="+977 98XXXXXXXX" disabled={lockedFields.has('phone')} {...register('phone')}
+                      className={`w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
                   </div>
                 </div>
               </div>
@@ -271,15 +303,15 @@ export default function ProfileSetup() {
                 <label className="text-sm font-semibold text-slate-700 mb-1.5 block">LinkedIn URL</label>
                 <div className="relative">
                   <FontAwesomeIcon icon={faLink} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input placeholder="https://linkedin.com/in/yourprofile" {...register('linkedin_url')}
-                    className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#74007a] focus:ring-2 focus:ring-[#74007a]/20 transition-all" />
+                  <input placeholder="https://linkedin.com/in/yourprofile" disabled={lockedFields.has('linkedin_url')} {...register('linkedin_url')}
+                    className={`w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
                 </div>
               </div>
 
               <div className="border-t border-slate-100 pt-5">
                 <div className="flex items-center gap-2.5 mb-5">
-                  <div className="w-9 h-9 rounded-xl bg-[#74007a]/8 flex items-center justify-center">
-                    <FontAwesomeIcon icon={faBriefcase} className="w-4 h-4 text-[#74007a]" />
+                  <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center">
+                    <FontAwesomeIcon icon={faBriefcase} className="w-4 h-4 text-primary" />
                   </div>
                   <h3 className="text-base font-bold text-slate-900">Job Preferences</h3>
                 </div>
@@ -292,7 +324,7 @@ export default function ProfileSetup() {
                     <div className="relative">
                       <FontAwesomeIcon icon={faBriefcase} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <input placeholder="e.g. Senior Frontend Engineer" {...register('desired_title')}
-                        className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#74007a] focus:ring-2 focus:ring-[#74007a]/20 transition-all" />
+                        className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                     </div>
                     {errors.desired_title && <p className="text-xs text-red-500 mt-1.5 ml-1">{errors.desired_title.message}</p>}
                   </div>
@@ -303,7 +335,7 @@ export default function ProfileSetup() {
                       <div className="relative">
                         <FontAwesomeIcon icon={faMapMarkerAlt} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <input placeholder="e.g. Kathmandu, Nepal" {...register('location')}
-                          className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#74007a] focus:ring-2 focus:ring-[#74007a]/20 transition-all" />
+                          className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                       </div>
                       {errors.location && <p className="text-xs text-red-500 mt-1.5 ml-1">{errors.location.message}</p>}
                     </div>
@@ -315,7 +347,7 @@ export default function ProfileSetup() {
                           value={profile?.work_model ?? undefined}
                           onValueChange={(v) => setValue('work_model', v as 'remote' | 'hybrid' | 'on-site')}
                         >
-                          <SelectTrigger className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 outline-none focus:border-[#74007a] focus:ring-2 focus:ring-[#74007a]/20 transition-all">
+                          <SelectTrigger className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
                             <SelectValue placeholder="Select..." />
                           </SelectTrigger>
                           <SelectContent>
@@ -337,7 +369,7 @@ export default function ProfileSetup() {
                           value={profile?.experience_level ?? undefined}
                           onValueChange={(v) => setValue('experience_level', v as 'entry' | 'mid' | 'senior' | 'lead')}
                         >
-                          <SelectTrigger className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 outline-none focus:border-[#74007a] focus:ring-2 focus:ring-[#74007a]/20 transition-all">
+                          <SelectTrigger className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
                             <SelectValue placeholder="Select..." />
                           </SelectTrigger>
                           <SelectContent>
@@ -354,7 +386,7 @@ export default function ProfileSetup() {
                       <div className="relative">
                         <FontAwesomeIcon icon={faIdCard} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <input placeholder="e.g. Nepali Citizen" {...register('work_authorization')}
-                          className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#74007a] focus:ring-2 focus:ring-[#74007a]/20 transition-all" />
+                          className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                       </div>
                       {errors.work_authorization && <p className="text-xs text-red-500 mt-1.5 ml-1">{errors.work_authorization.message}</p>}
                     </div>
@@ -366,12 +398,12 @@ export default function ProfileSetup() {
                       <div className="relative">
                         <FontAwesomeIcon icon={faDollarSign} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <input type="number" placeholder="Min" {...register('salary_min', { valueAsNumber: true })}
-                          className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#74007a] focus:ring-2 focus:ring-[#74007a]/20 transition-all" />
+                          className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                       </div>
                       <div className="relative">
                         <FontAwesomeIcon icon={faDollarSign} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <input type="number" placeholder="Max" {...register('salary_max', { valueAsNumber: true })}
-                          className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#74007a] focus:ring-2 focus:ring-[#74007a]/20 transition-all" />
+                          className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                       </div>
                     </div>
                   </div>
@@ -381,18 +413,19 @@ export default function ProfileSetup() {
               <div className="border-t border-slate-100 pt-5">
                 <label className="text-sm font-semibold text-slate-700 mb-1.5 block">
                   Skills <span className="text-xs text-slate-400 font-normal">(comma-separated)</span>
+                  {lockedFields.has('skills') && <span className="text-xs text-slate-400 font-normal"> — from your resume</span>}
                 </label>
                 <div className="relative">
                   <FontAwesomeIcon icon={faTags} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input placeholder="React, TypeScript, Python, ..." {...register('skills')}
-                    className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#74007a] focus:ring-2 focus:ring-[#74007a]/20 transition-all" />
+                  <input placeholder="React, TypeScript, Python, ..." disabled={lockedFields.has('skills')} {...register('skills')}
+                    className={`w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting || updateMutation.isPending}
-                className="w-full h-11 rounded-full bg-gradient-to-r from-[#4a0080] via-[#74007a] to-[#da70dc] hover:from-[#da70dc] hover:via-[#74007a] hover:to-[#4a0080] text-white text-sm font-bold tracking-wide shadow-lg shadow-[#74007a]/20 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-2"
+                className="w-full h-11 rounded-full bg-linear-to-r from-[#4a0080] via-primary to-secondary hover:from-secondary hover:via-primary hover:to-[#4a0080] text-white text-sm font-bold tracking-wide shadow-lg shadow-primary/20 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-2"
               >
                 <FontAwesomeIcon icon={faCheck} className="w-4 h-4" />
                 {updateMutation.isPending ? 'Saving...' : 'Save Profile'}
@@ -405,13 +438,13 @@ export default function ProfileSetup() {
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-slate-600 uppercase tracking-wide">Completeness</h3>
-              <span className="text-xs font-bold text-[#74007a] bg-[#74007a]/8 px-2.5 py-1 rounded-full">
+              <span className="text-xs font-bold text-primary bg-primary/8 px-2.5 py-1 rounded-full">
                 {completeness}%
               </span>
             </div>
             <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden mb-3">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[#4a0080] via-[#74007a] to-[#da70dc] transition-all duration-700"
+                className="h-full rounded-full bg-linear-to-r from-[#4a0080] via-primary to-secondary transition-all duration-700"
                 style={{ width: `${completeness}%` }}
               />
             </div>
@@ -422,15 +455,15 @@ export default function ProfileSetup() {
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-9 h-9 rounded-xl bg-[#74007a]/8 flex items-center justify-center">
-                <FontAwesomeIcon icon={faTags} className="w-4 h-4 text-[#74007a]" />
+              <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center">
+                <FontAwesomeIcon icon={faTags} className="w-4 h-4 text-primary" />
               </div>
               <h3 className="text-sm font-bold text-slate-900">Skills</h3>
             </div>
             {skillsList.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {skillsList.map((skill) => (
-                  <span key={skill} className="inline-flex items-center rounded-full bg-[#74007a]/8 text-[#74007a] text-xs font-semibold px-3 py-1.5 border border-[#74007a]/15">
+                  <span key={skill} className="inline-flex items-center rounded-full bg-primary/8 text-primary text-xs font-semibold px-3 py-1.5 border border-primary/15">
                     {skill}
                   </span>
                 ))}

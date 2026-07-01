@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -46,8 +47,9 @@ export default function Register() {
       await login(data.email, data.password)
       toast.success('Account created — let\'s set up your resume')
       navigate('/profile-setup')
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail ?? 'Registration failed')
+    } catch (err) {
+      const detail = axios.isAxiosError(err) ? err.response?.data?.detail : undefined
+      toast.error(detail ?? 'Registration failed')
     }
   }
 

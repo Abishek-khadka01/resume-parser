@@ -54,7 +54,7 @@ export default function RedirectGoogle() {
     };
 
     exchangeCode();
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, setSession]);
 
   return (
     <div className="h-screen grid place-items-center">

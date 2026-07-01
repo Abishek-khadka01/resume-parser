@@ -28,10 +28,13 @@ def update_profile(
     profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
-    for field, value in body.model_dump(exclude_none=True).items():
+    updates = body.model_dump(exclude_none=True)
+    locked = set(profile.resume_locked_fields or [])
+    updates = {k: v for k, v in updates.items() if k not in locked}
+    for field, value in updates.items():
         setattr(profile, field, value)
-    if body.skills is not None:
-        profile.skills_categorized = skill_service.categorize_skills(body.skills)
+    if "skills" in updates:
+        profile.skills_categorized = skill_service.categorize_skills(updates["skills"])
     profile.completeness_pct = calculate_completeness(profile)
     db.commit()
     db.refresh(profile)

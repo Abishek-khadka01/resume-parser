@@ -1,12 +1,9 @@
 import json
 import httpx
-from google import genai
-from google.genai import errors as genai_errors
 from app.core.config import settings
 
-client = genai.Client(api_key=settings.GEMINI_API_KEY)
-
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 PARSE_PROMPT = """Extract the following structured data from this resume text.
 Return a JSON object with these keys:
@@ -26,25 +23,33 @@ Resume:
 
 async def parse_resume_text(text: str) -> dict:
     prompt = PARSE_PROMPT.replace("{text}", text[:6000])
-    try:
-        response = await client.aio.models.generate_content(
-            model=settings.GEMINI_MODEL,
-            contents=prompt,
-        )
-        raw = response.text
-    except (genai_errors.APIError, httpx.HTTPError):
-        raw = await _parse_with_openrouter(prompt)
+    raw = None
+
+    if settings.OPENROUTER_API_KEY:
+        try:
+            raw = await _chat_completion(OPENROUTER_URL, settings.OPENROUTER_API_KEY, settings.OPENROUTER_MODEL, prompt)
+        except httpx.HTTPError:
+            raw = None
+
+    if raw is None and settings.GROQ_API_KEY:
+        try:
+            raw = await _chat_completion(GROQ_URL, settings.GROQ_API_KEY, settings.GROQ_MODEL, prompt)
+        except httpx.HTTPError:
+            raw = None
+
+    if raw is None:
+        raise RuntimeError("No AI provider succeeded in parsing the resume")
 
     return json.loads(_strip_code_fence(raw))
 
 
-async def _parse_with_openrouter(prompt: str) -> str:
-    async with httpx.AsyncClient(timeout=30) as http_client:
+async def _chat_completion(url: str, api_key: str, model: str, prompt: str) -> str:
+    async with httpx.AsyncClient(timeout=15) as http_client:
         resp = await http_client.post(
-            OPENROUTER_URL,
-            headers={"Authorization": f"Bearer {settings.OPENROUTER_API_KEY}"},
+            url,
+            headers={"Authorization": f"Bearer {api_key}"},
             json={
-                "model": settings.OPENROUTER_MODEL,
+                "model": model,
                 "messages": [{"role": "user", "content": prompt}],
             },
         )
