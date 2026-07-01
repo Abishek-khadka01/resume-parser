@@ -10,7 +10,8 @@ class Settings(BaseSettings):
 
     ANTHROPIC_API_KEY: str
     RAPIDAPI_KEY: str
-    RAPIDAPI_HOST: str = "linkedin-job-search-api.p.rapidapi.com"
+    RAPIDAPI_HOST: str = "jsearch.p.rapidapi.com"
+    RAPIDAPI_BASE_URL: str = "https://jsearch.p.rapidapi.com"
     LINKEDIN_JOBS_RAPIDAPI_HOST: str = "linkedin-job-search-api.p.rapidapi.com"
     LINKED_IN_RAPID_API_KEY: str | None = None
     LINKED_IN_RAPID_API_HOST: str | None = None

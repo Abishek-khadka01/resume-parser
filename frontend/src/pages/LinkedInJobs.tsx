@@ -30,7 +30,7 @@ import { LinkedInJobCard } from "@/components/jobs/LinkedInJobCard";
 import { LinkedInJobDetail } from "@/components/jobs/LinkedInJobDetail";
 import { cn } from "@/lib/utils";
 import api from "@/lib/api";
-import type { LinkedInJob } from "@/types";
+import type { Job } from "@/types";
 
 /* ── sections ── */
 type SectionKey = "jobs" | "internships" | "remote" | "easy_apply";
@@ -205,7 +205,7 @@ export default function LinkedInJobs() {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   // ── KEY FIX: selectedJob drives the detail panel ──
-  const [selectedJob, setSelectedJob] = useState<LinkedInJob | null>(null);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   const currentSection = SECTIONS.find((s) => s.key === section)!;
 
@@ -279,8 +279,8 @@ export default function LinkedInJobs() {
     data: jobs,
     isLoading,
     isError,
-  } = useQuery<LinkedInJob[]>({
-    queryKey: ["linkedin-jobs", queryParams],
+  } = useQuery<Job[]>({
+    queryKey: ["jobs", queryParams],
     queryFn: () =>
       api.get("/jobs/linkedin", { params: queryParams }).then((r) => r.data),
     staleTime: 1000 * 60 * 5,
@@ -293,12 +293,12 @@ export default function LinkedInJobs() {
   }, [jobs]);
 
   const saveMutation = useMutation({
-    mutationFn: (job: LinkedInJob) =>
+    mutationFn: (job: Job) =>
       api.post("/applications", {
-        job_id: job.id,
-        job_title: job.title,
-        company_name: job.organization,
-        company_logo_url: job.organization_logo,
+        job_id: job.job_id ?? job.job_apply_link,
+        job_title: job.job_title,
+        company_name: job.employer_name,
+        company_logo_url: job.employer_logo,
         status: "saved",
         job_data: job,
       }),
@@ -365,7 +365,7 @@ export default function LinkedInJobs() {
       {/* ── search bar ── */}
       <div className="shrink-0 pb-3">
         <form onSubmit={handleSearch} className="flex gap-2 flex-wrap">
-          <div className="relative flex-1 min-w-[180px]">
+          <div className="relative flex-1 min-w-45">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
               placeholder="Job title or skill…"
@@ -564,7 +564,7 @@ export default function LinkedInJobs() {
               >
                 <X className="h-3 w-3" /> Exclude Agencies
               </button>
-              <div className="relative flex-1 min-w-[160px] max-w-[220px]">
+              <div className="relative flex-1 min-w-40 max-w-55">
                 <Input
                   className="h-8 text-xs"
                   placeholder="Company slug (e.g. google)"
@@ -697,7 +697,7 @@ export default function LinkedInJobs() {
         <div
           className={cn(
             "flex flex-col gap-2 overflow-y-auto pr-1 shrink-0 transition-all",
-            selectedJob ? "w-[340px]" : "flex-1",
+            selectedJob ? "w-85" : "flex-1",
           )}
         >
           {isLoading &&
@@ -733,9 +733,9 @@ export default function LinkedInJobs() {
           {!isLoading &&
             jobs?.map((job) => (
               <LinkedInJobCard
-                key={job.id}
+                key={job.job_id ?? job.job_apply_link}
                 job={job}
-                isSelected={selectedJob?.id === job.id}
+                isSelected={selectedJob?.job_id === job.job_id}
                 onSelect={(j) => setSelectedJob(j)} // ← opens detail
                 onSave={(j) => saveMutation.mutate(j)}
                 isSaving={saveMutation.isPending}
