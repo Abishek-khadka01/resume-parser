@@ -41,13 +41,11 @@ export default function Login() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const form = new URLSearchParams();
-      form.append("username", data.email);
-      form.append("password", data.password);
-      const res = await api.post("/auth/login", form, {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      const res = await api.post("/auth/login", data, {
+        headers: { "Content-Type": "application/json" },
       });
       localStorage.setItem("access_token", res.data.access_token);
+      navigate("/dashboard");
 
       if (rememberMe) {
         localStorage.setItem("remembered_email", data.email);
