@@ -16,11 +16,12 @@ import type { Job } from '@/types'
 interface JobCardProps {
   job: Job
   onSave?: (job: Job) => void
+  onViewDetails?: (job: Job) => void
   saved?: boolean
   index?: number
 }
 
-export default function JobCard({ job, onSave, saved, index = 0 }: JobCardProps) {
+export default function JobCard({ job, onSave, onViewDetails, saved, index = 0 }: JobCardProps) {
   const formatSalary = (min?: number, max?: number, currency?: string) => {
     if (min == null && max == null) return null
     const fmt = (n: number) =>
@@ -165,6 +166,7 @@ export default function JobCard({ job, onSave, saved, index = 0 }: JobCardProps)
 
         {job.match_score != null && (
           <button
+            onClick={() => onViewDetails?.(job)}
             className="ml-auto inline-flex items-center gap-2 h-9 px-4 rounded-full text-xs font-semibold text-slate-500 hover:text-[#74007a] hover:bg-[#74007a]/8 border border-slate-200 hover:border-[#74007a]/20 transition-all duration-200 cursor-pointer"
             title="ATS Analysis"
           >

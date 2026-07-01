@@ -2,10 +2,12 @@ import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function RedirectGoogle() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const setSession = useAuthStore((s) => s.setSession);
   const exchangeStarted = useRef(false);
 
   useEffect(() => {
@@ -27,17 +29,17 @@ export default function RedirectGoogle() {
           code,
         });
 
-        const { access_token } = response.data;
+        const { access_token, is_new_user } = response.data;
 
         if (!access_token) {
           throw new Error("Access token missing");
         }
 
-        localStorage.setItem("access_token", access_token);
+        setSession(access_token);
 
         toast.success("Google login successful");
 
-        navigate("/dashboard", {
+        navigate(is_new_user ? "/profile-setup" : "/dashboard", {
           replace: true,
         });
       } catch (error) {

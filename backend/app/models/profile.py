@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Date, Text, Enum as SAEnum
-from sqlalchemy.dialects.postgresql import UUID, ARRAY
+from sqlalchemy.dialects.postgresql import UUID, ARRAY, JSONB
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -22,6 +22,7 @@ class Profile(Base):
     salary_min = Column(Integer, nullable=True)
     salary_max = Column(Integer, nullable=True)
     skills = Column(ARRAY(String), default=list)
+    skills_categorized = Column(JSONB, nullable=True)
     completeness_pct = Column(Integer, default=0)
     resume_url = Column(String, nullable=True)
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

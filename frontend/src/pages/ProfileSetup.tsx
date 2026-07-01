@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -54,6 +55,7 @@ export default function ProfileSetup() {
   const [dragOver, setDragOver] = useState(false)
   const [inputMode, setInputMode] = useState<'upload' | 'manual'>('upload')
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   const { data: profile, isLoading } = useQuery<ProfileType>({
     queryKey: ['profile'],
@@ -111,8 +113,9 @@ export default function ProfileSetup() {
     setUploading(true)
     try {
       await uploadResume(file)
-      toast.success('Resume parsed successfully')
+      toast.success('Resume parsed successfully — finding matching jobs...')
       queryClient.invalidateQueries({ queryKey: ['profile'] })
+      setTimeout(() => navigate('/job-board'), 1200)
     } catch {
       toast.error('Failed to parse resume')
     } finally {

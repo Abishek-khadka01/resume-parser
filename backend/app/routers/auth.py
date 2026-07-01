@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import hash_password, verify_password, create_access_token
@@ -16,7 +17,7 @@ router = APIRouter()
 
 @router.post("/register", response_model=UserOut, status_code=201)
 def register(body: UserCreate, db: Session = Depends(get_db)):
-    if db.query(User).filter(User.email == body.email).first():
+    if db.query(User).filter(func.lower(User.email) == body.email.lower()).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     user = User(email=body.email, password_hash=hash_password(body.password), auth_provider="local")
     db.add(user)
@@ -30,19 +31,20 @@ def register(body: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post('/login')
-def userLogin(request : UserLogin, db : Session = Depends(get_db)): 
-    user = db.query(User).filter(User.email == request.email).first() 
-    if not user: 
+def userLogin(request : UserLogin, db : Session = Depends(get_db)):
+    user = db.query(User).filter(func.lower(User.email) == request.email.lower()).first()
+    if not user:
         raise HTTPException(status_code=400, detail='User do not exists')
-    print(user)
+    if not user.password_hash:
+        raise HTTPException(status_code=400, detail="This account uses Google sign-in. Please log in with Google.")
     checkpassword : bool = verify_password(request.password, user.password_hash )
-    
+
     if not checkpassword:
         raise HTTPException(status_code=400, detail="Invalid Credentials")
     
     token = create_access_token({"sub": str(user.id), "email": user.email})
     return {
-        "user" : user , 
+        "user" : UserOut.model_validate(user),
         "access_token": token,
         "token_type": "bearer"}
     

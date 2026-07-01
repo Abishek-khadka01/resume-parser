@@ -61,6 +61,28 @@ export interface Job {
   job_offer_expiration_datetime_utc?: string;
   job_start_date?: string;
   job_end_date?: string;
+  job_highlights?: Record<string, string[]>;
+}
+
+export interface JobSearchResponse {
+  jobs: Job[];
+  cursor?: string | null;
+}
+
+export interface Suggestion {
+  type: "missing_skill" | "underemphasized_skill";
+  category: string;
+  keyword: string;
+  message: string;
+}
+
+export interface AtsAnalysis {
+  score: number;
+  skill_score: number;
+  text_score: number;
+  matched_skills: Record<string, string[]>;
+  missing_skills: Record<string, string[]>;
+  suggestions: Suggestion[];
 }
 
 export type ApplicationStatus =

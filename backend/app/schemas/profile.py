@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict
 from datetime import date
 from uuid import UUID
 
@@ -37,6 +37,7 @@ class ProfileOut(BaseModel):
     salary_min: Optional[int] = None
     salary_max: Optional[int] = None
     skills: List[str] = []
+    skills_categorized: Optional[Dict[str, List[str]]] = None
     completeness_pct: int = 0
     resume_url: Optional[str] = None
     work_experience: List[WorkExperienceOut] = []

@@ -9,8 +9,9 @@ import {
   faBriefcase,
 } from '@fortawesome/free-solid-svg-icons'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getLinkedInJobs, createApplication } from '@/services/api'
+import { getJobs, createApplication } from '@/services/api'
 import JobCard from '@/components/JobCard'
+import JobDetailModal from '@/components/JobDetailModal'
 import type { Job } from '@/types'
 
 export default function JobBoard() {
@@ -19,12 +20,15 @@ export default function JobBoard() {
   const [submittedSearch, setSubmittedSearch] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set())
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null)
+  const [detailOpen, setDetailOpen] = useState(false)
 
-  const { data: jobs, isLoading } = useQuery({
-    queryKey: ['linkedin-jobs', submittedSearch],
-    queryFn: () => getLinkedInJobs(submittedSearch ? { q: submittedSearch } : undefined),
+  const { data, isLoading } = useQuery({
+    queryKey: ['jobs', submittedSearch],
+    queryFn: () => getJobs(submittedSearch ? { q: submittedSearch } : undefined),
     enabled: true,
   })
+  const jobs = data?.jobs
 
   const saveMutation = useMutation({
     mutationFn: (job: Job) =>
@@ -150,11 +154,14 @@ export default function JobBoard() {
               job={job}
               index={i}
               onSave={handleSave}
+              onViewDetails={(j) => { setSelectedJob(j); setDetailOpen(true) }}
               saved={savedJobIds.has(job.job_id)}
             />
           ))}
         </div>
       )}
+
+      <JobDetailModal job={selectedJob} open={detailOpen} onOpenChange={setDetailOpen} />
     </motion.div>
   )
 }

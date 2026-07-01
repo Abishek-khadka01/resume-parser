@@ -6,6 +6,7 @@ from app.models.user import User
 from app.models.profile import Profile
 from app.schemas.profile import ProfileOut, ProfileUpdate
 from app.services.profile_service import calculate_completeness
+from app.services import skill_service
 
 router = APIRouter()
 
@@ -29,6 +30,8 @@ def update_profile(
         raise HTTPException(status_code=404, detail="Profile not found")
     for field, value in body.model_dump(exclude_none=True).items():
         setattr(profile, field, value)
+    if body.skills is not None:
+        profile.skills_categorized = skill_service.categorize_skills(body.skills)
     profile.completeness_pct = calculate_completeness(profile)
     db.commit()
     db.refresh(profile)
