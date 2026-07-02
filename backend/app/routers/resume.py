@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, Body, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.dependencies import get_current_user
@@ -6,10 +6,14 @@ from app.models.user import User
 from app.models.profile import Profile, WorkExperience, Education
 from app.schemas.profile import ProfileOut
 from app.services.ai_service import parse_resume_text
+from app.services.job_service import get_job_details
 from app.services.profile_service import calculate_completeness
+from app.services import skill_service, pdf_service, resume_optimizer_service
 import io
 
 router = APIRouter()
+
+LOCKABLE_FIELDS = ("full_name", "phone", "linkedin_url", "skills")
 
 
 @router.post("/upload", response_model=ProfileOut)
@@ -36,6 +40,13 @@ async def upload_resume(
         if val:
             setattr(profile, field, val)
 
+    if parsed.get("skills"):
+        profile.skills_categorized = skill_service.categorize_skills(parsed["skills"])
+
+    newly_locked = {f for f in LOCKABLE_FIELDS if parsed.get(f)}
+    profile.resume_locked_fields = sorted(set(profile.resume_locked_fields or []) | newly_locked)
+    profile.resume_uploaded = True
+
     db.query(WorkExperience).filter(WorkExperience.profile_id == profile.id).delete()
     for exp in parsed.get("work_experience", []):
         db.add(WorkExperience(profile_id=profile.id, **exp))
@@ -50,10 +61,60 @@ async def upload_resume(
     return profile
 
 
+@router.post("/enhanced-pdf")
+def download_enhanced_resume(
+    accepted_suggestions: list[dict] | None = Body(default=None, embed=True),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from fastapi.responses import Response
+
+    profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    pdf_bytes = pdf_service.build_enhanced_resume_pdf(profile, accepted_suggestions)
+    filename = f"{(profile.full_name or 'resume').replace(' ', '_')}_resume.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.post("/optimized-pdf")
+async def download_optimized_resume(
+    job: dict = Body(..., embed=True),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from fastapi.responses import Response
+
+    profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    job_id = job.get("job_id")
+    if job_id:
+        details = await get_job_details(job_id)
+        if details:
+            job = {**job, **details}
+
+    optimization = await resume_optimizer_service.optimize_resume(job, profile)
+    pdf_bytes = pdf_service.build_optimized_resume_pdf(profile, optimization)
+    filename = f"{(profile.full_name or 'resume').replace(' ', '_')}_optimized_resume.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 def _extract_text(content: bytes, mime: str) -> str:
     if mime == "application/pdf":
-        import pdf2text
-        return pdf2text.extract_text(io.BytesIO(content))
+        from pypdf import PdfReader
+        reader = PdfReader(io.BytesIO(content))
+        return "\n".join(page.extract_text() or "" for page in reader.pages)
     from docx import Document
     doc = Document(io.BytesIO(content))
     return "\n".join(p.text for p in doc.paragraphs)

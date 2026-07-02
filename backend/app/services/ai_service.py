@@ -1,8 +1,9 @@
 import json
-from anthropic import AsyncAnthropic
+import httpx
 from app.core.config import settings
 
-client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 PARSE_PROMPT = """Extract the following structured data from this resume text.
 Return a JSON object with these keys:
@@ -19,49 +20,47 @@ Only return valid JSON. No markdown, no explanation.
 Resume:
 {text}"""
 
-SCORE_PROMPT = """Rate how well this candidate profile matches the job description.
-Return only a JSON object: {{"score": <0-100>, "reasoning": "<one sentence>"}}
-
-Candidate skills: {skills}
-Candidate title: {title}
-Experience level: {level}
-
-Job title: {job_title}
-Job description (first 800 chars): {job_desc}"""
-
 
 async def parse_resume_text(text: str) -> dict:
-    msg = await client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=2048,
-        messages=[{"role": "user", "content": PARSE_PROMPT.format(text=text[:6000])}],
-    )
-    raw = msg.content[0].text.strip()
-    return json.loads(raw)
+    prompt = PARSE_PROMPT.replace("{text}", text[:6000])
+    raw = None
+
+    if settings.OPENROUTER_API_KEY:
+        try:
+            raw = await _chat_completion(OPENROUTER_URL, settings.OPENROUTER_API_KEY, settings.OPENROUTER_MODEL, prompt)
+        except httpx.HTTPError:
+            raw = None
+
+    if raw is None and settings.GROQ_API_KEY:
+        try:
+            raw = await _chat_completion(GROQ_URL, settings.GROQ_API_KEY, settings.GROQ_MODEL, prompt)
+        except httpx.HTTPError:
+            raw = None
+
+    if raw is None:
+        raise RuntimeError("No AI provider succeeded in parsing the resume")
+
+    return json.loads(_strip_code_fence(raw))
 
 
-async def score_job(job: dict, profile) -> int:
-    prompt = SCORE_PROMPT.format(
-        skills=", ".join(profile.skills[:30]),
-        title=profile.desired_title or "",
-        level=profile.experience_level or "",
-        job_title=job.get("job_title", ""),
-        job_desc=job.get("job_description", "")[:800],
-    )
-    msg = await client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=128,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    data = json.loads(msg.content[0].text.strip())
-    return data.get("score", 0)
+async def _chat_completion(url: str, api_key: str, model: str, prompt: str) -> str:
+    async with httpx.AsyncClient(timeout=15) as http_client:
+        resp = await http_client.post(
+            url,
+            headers={"Authorization": f"Bearer {api_key}"},
+            json={
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+            },
+        )
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"]
 
 
-async def score_jobs_batch(jobs: list, profile) -> list:
-    import asyncio
-    scores = await asyncio.gather(*[score_job(j, profile) for j in jobs], return_exceptions=True)
-    for job, score in zip(jobs, scores):
-        if isinstance(score, int):
-            job["match_score"] = score
-    jobs.sort(key=lambda j: j.get("match_score", 0), reverse=True)
-    return jobs
+def _strip_code_fence(raw: str) -> str:
+    raw = raw.strip()
+    if raw.startswith("```"):
+        raw = raw.strip("`")
+        if raw.startswith("json"):
+            raw = raw[4:]
+    return raw.strip()
