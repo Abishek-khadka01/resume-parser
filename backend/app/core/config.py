@@ -8,13 +8,14 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
-    ANTHROPIC_API_KEY: str
+    GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "llama-3.3-70b-versatile"
+    OPENROUTER_API_KEY: str = ""
+    OPENROUTER_MODEL: str = "google/gemma-4-26b-a4b-it:free"
+    HF_TOKEN: str = ""
     RAPIDAPI_KEY: str
-    RAPIDAPI_HOST: str = "linkedin-job-search-api.p.rapidapi.com"
-    LINKEDIN_JOBS_RAPIDAPI_HOST: str = "linkedin-job-search-api.p.rapidapi.com"
-    LINKED_IN_RAPID_API_KEY: str | None = None
-    LINKED_IN_RAPID_API_HOST: str | None = None
-    BASE_RAPID_REQUEST_URL: str = "https://linkedin-job-search-api.p.rapidapi.com"
+    JSEARCH_RAPIDAPI_HOST: str = "jsearch.p.rapidapi.com"
+    JSEARCH_BASE_URL: str = "https://jsearch.p.rapidapi.com"
 
     RESEND_API_KEY: str
     EMAIL_FROM: str = "alerts@resumematch.app"

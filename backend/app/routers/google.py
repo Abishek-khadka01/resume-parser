@@ -12,6 +12,7 @@ from authlib.integrations.starlette_client import OAuth
 from app.core.database import get_db
 from app.core.security import create_access_token
 from app.models.user import User
+from app.models.profile import Profile
 
 
 load_dotenv(find_dotenv())
@@ -92,7 +93,7 @@ def save_user(
     )
 
     if existing_user:
-        return existing_user
+        return existing_user, False
 
     email_user = (
         db.query(User)
@@ -108,7 +109,7 @@ def save_user(
         db.commit()
         db.refresh(email_user)
 
-        return email_user
+        return email_user, False
 
     new_user = User(
         email=user_info["email"],
@@ -118,10 +119,12 @@ def save_user(
     )
 
     db.add(new_user)
+    db.flush()
+    db.add(Profile(user_id=new_user.id, full_name=user_info.get("name")))
     db.commit()
     db.refresh(new_user)
 
-    return new_user
+    return new_user, True
 
 
 
@@ -162,7 +165,7 @@ async def google_callback(
 
         print("the user info is ", user_info)
 
-        user = save_user(
+        user, is_new_user = save_user(
             user_info=user_info,
             db=db,
         )
@@ -184,6 +187,7 @@ async def google_callback(
             },
             "access_token": app_access_token,
             "token_type": "bearer",
+            "is_new_user": is_new_user,
         }
 
     except httpx.HTTPStatusError as e:

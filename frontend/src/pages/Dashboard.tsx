@@ -176,7 +176,7 @@ export default function Dashboard() {
                   <p className="text-sm text-slate-500 mt-0.5">{app.company_name}</p>
                   {app.match_score != null && (
                     <span className={cn('inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold mt-1.5', getMatchColor(app.match_score))}>
-                      {app.match_score}% match
+                      {app.match_score}/10 match
                     </span>
                   )}
                 </div>

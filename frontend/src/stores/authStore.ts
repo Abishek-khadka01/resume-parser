@@ -35,6 +35,7 @@ interface AuthState {
   register: (fullName: string, email: string, password: string) => Promise<void>
   logout: () => void
   setAuthModalOpen: (open: boolean) => void
+  setSession: (token: string) => void
 }
 
 const initialUser = getPersistedUser()
@@ -60,6 +61,12 @@ export const useAuthStore = create<AuthState>()((set) => ({
   logout: () => {
     localStorage.removeItem('access_token')
     set({ user: null, isLoggedIn: false })
+  },
+
+  setSession: (token: string) => {
+    localStorage.setItem('access_token', token)
+    const user = decodeToken(token)
+    set({ user, isLoggedIn: !!user })
   },
 
   setAuthModalOpen: (open: boolean) => {

@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Date, Text, Enum as SAEnum
-from sqlalchemy.dialects.postgresql import UUID, ARRAY
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Date, Text, Boolean, Enum as SAEnum
+from sqlalchemy.dialects.postgresql import UUID, ARRAY, JSONB
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -14,7 +14,9 @@ class Profile(Base):
     full_name = Column(String, nullable=True)
     phone = Column(String, nullable=True)
     linkedin_url = Column(String, nullable=True)
+    github_url = Column(String, nullable=True)
     location = Column(String, nullable=True)
+    summary = Column(Text, nullable=True)
     desired_title = Column(String, nullable=True)
     work_model = Column(SAEnum("remote", "hybrid", "on-site", name="work_model_enum"), nullable=True)
     experience_level = Column(SAEnum("entry", "mid", "senior", "lead", name="exp_level_enum"), nullable=True)
@@ -22,8 +24,12 @@ class Profile(Base):
     salary_min = Column(Integer, nullable=True)
     salary_max = Column(Integer, nullable=True)
     skills = Column(ARRAY(String), default=list)
+    skills_categorized = Column(JSONB, nullable=True)
     completeness_pct = Column(Integer, default=0)
     resume_url = Column(String, nullable=True)
+    resume_raw_text = Column(Text, nullable=True)
+    resume_uploaded = Column(Boolean, nullable=False, default=False)
+    resume_locked_fields = Column(ARRAY(String), nullable=False, default=list)
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="profile")

@@ -14,6 +14,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import logo from "@/assets/logo-purple.png";
 import api from "@/lib/api";
+import { useAuthStore } from "@/stores/authStore";
 
 const schema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -25,6 +26,7 @@ const NAV_ITEMS = [{ to: "/login", label: "LOG IN" }];
 
 export default function Login() {
   const navigate = useNavigate();
+  const login = useAuthStore((s) => s.login);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
@@ -41,11 +43,7 @@ export default function Login() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const res = await api.post("/auth/login", data, {
-        headers: { "Content-Type": "application/json" },
-      });
-      localStorage.setItem("access_token", res.data.access_token);
-      navigate("/dashboard");
+      await login(data.email, data.password);
 
       if (rememberMe) {
         localStorage.setItem("remembered_email", data.email);
@@ -61,10 +59,7 @@ export default function Login() {
 
   const handleGoogleLogin = async () => {
     const response = await api.get("/google/login");
-    console.log(response.data);
     window.location.href = response.data.url;
-
-    navigate("/dashboard");
   };
 
   return (

@@ -3,12 +3,14 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
 import logo from '@/assets/logo-purple.png'
 import api from '@/lib/api'
+import { useAuthStore } from '@/stores/authStore'
 
 const schema = z.object({
   fullName: z.string().min(2, 'Full name is required'),
@@ -27,6 +29,7 @@ const NAV_ITEMS = [
 
 export default function Register() {
   const navigate = useNavigate()
+  const login = useAuthStore((s) => s.login)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
 
@@ -41,10 +44,12 @@ export default function Register() {
   const onSubmit = async (data: FormData) => {
     try {
       await api.post('/auth/register', { full_name: data.fullName, email: data.email, password: data.password })
-      toast.success('Account created — please sign in')
-      navigate('/login')
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail ?? 'Registration failed')
+      await login(data.email, data.password)
+      toast.success('Account created — let\'s set up your resume')
+      navigate('/profile-setup')
+    } catch (err) {
+      const detail = axios.isAxiosError(err) ? err.response?.data?.detail : undefined
+      toast.error(detail ?? 'Registration failed')
     }
   }
 
