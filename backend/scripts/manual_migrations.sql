@@ -15,3 +15,14 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS resume_uploaded BOOLEAN NOT NULL D
 -- 2026-07-01: per-field lock list (only fields the parser actually populated get
 -- locked; anything the resume didn't mention stays editable so the user can fill it in)
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS resume_locked_fields VARCHAR[] NOT NULL DEFAULT '{}';
+
+-- 2026-07-02: store the full original extracted resume text, so PDF regeneration
+-- (optimized-pdf) can append it verbatim and never silently drop content the
+-- structured parser doesn't model (Projects, Certifications, etc.)
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS resume_raw_text TEXT;
+
+-- 2026-07-02: GitHub URL and professional summary, both parsed straight from the
+-- resume (github via regex_extractor, summary via section_segmenter) but never
+-- previously surfaced onto the Profile record.
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS github_url VARCHAR;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS summary TEXT;

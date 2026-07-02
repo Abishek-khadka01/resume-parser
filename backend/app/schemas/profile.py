@@ -29,7 +29,9 @@ class ProfileOut(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
     linkedin_url: Optional[str] = None
+    github_url: Optional[str] = None
     location: Optional[str] = None
+    summary: Optional[str] = None
     desired_title: Optional[str] = None
     work_model: Optional[str] = None
     experience_level: Optional[str] = None
@@ -51,7 +53,9 @@ class ProfileUpdate(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
     linkedin_url: Optional[str] = None
+    github_url: Optional[str] = None
     location: Optional[str] = None
+    summary: Optional[str] = None
     desired_title: Optional[str] = None
     work_model: Optional[str] = None
     experience_level: Optional[str] = None

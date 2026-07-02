@@ -11,7 +11,9 @@ export interface Profile {
   full_name: string;
   phone?: string;
   linkedin_url?: string;
+  github_url?: string;
   location?: string;
+  summary?: string;
   desired_title?: string;
   work_model?: "remote" | "hybrid" | "on-site";
   experience_level?: "entry" | "mid" | "senior" | "lead";

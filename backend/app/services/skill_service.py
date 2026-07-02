@@ -80,3 +80,44 @@ def extract_skills_from_text(text: str) -> dict[str, list[str]]:
 
 def flatten(categorized: dict[str, list[str]]) -> set[str]:
     return {term.lower() for terms in categorized.values() for term in terms}
+
+
+_LIST_DELIM_RE = re.compile(r"[•▪◦·∙‣⁃|,;\t]+|\s{2,}")
+# Matches an inline category label a resume author put before a sub-list on
+# the same line, e.g. "Cloud & DevOps: AWS, Azure, ..." or "Languages: Python,
+# ..." — strip just the label, not the terms after the colon.
+_CATEGORY_PREFIX_RE = re.compile(r"^[A-Za-z][A-Za-z &]{1,40}:\s*")
+_SKILL_STOPWORDS = {
+    "and", "or", "with", "in", "of", "the", "a", "an", "including", "such", "as",
+    "skills", "technical", "technologies", "proficient", "familiar", "etc",
+}
+
+
+def split_skill_list(text: str) -> list[str]:
+    """Tokenizes a Skills-section block into candidate skill strings.
+
+    The gazetteer (PhraseMatcher) only recognizes a fixed vocabulary, so it
+    silently drops any real skill outside that list. But a resume's own
+    Skills section is almost always the author's own delimiter-separated
+    list (bullets/commas/pipes) — trusting that structure, rather than only
+    matching known terms, gets far higher recall without inventing a
+    boundless keyword list. Categorization (known vs "uncategorized") still
+    happens downstream via categorize_skills().
+
+    Slashes are deliberately not treated as delimiters (unlike commas/pipes)
+    since compound terms like "CI/CD" or "TCP/IP" would otherwise be split
+    into meaningless halves.
+    """
+    items: list[str] = []
+    for line in text.splitlines():
+        line = _CATEGORY_PREFIX_RE.sub("", line.strip())
+        for raw in _LIST_DELIM_RE.split(line):
+            item = raw.strip(" :()-–—")
+            if not item or len(item) < 2 or len(item) > 40:
+                continue
+            if item.lower() in _SKILL_STOPWORDS:
+                continue
+            if len(item.split()) > 4:
+                continue
+            items.append(item)
+    return items

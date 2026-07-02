@@ -1,24 +1,41 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faWandMagicSparkles, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faWandMagicSparkles, faSpinner, faArrowRight } from '@fortawesome/free-solid-svg-icons'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getAtsAnalysis, downloadOptimizedResume } from '@/services/api'
-import { getMatchColor, categoryLabel } from '@/lib/utils'
-import type { Job } from '@/types'
+import { getResumeOptimization, downloadOptimizedResume } from '@/services/api'
+import { getMatchColor } from '@/lib/utils'
+import type { Job, ResumeChange } from '@/types'
 
 interface JobSuggestionsPanelProps {
   job: Job
+  onScoreResolved?: (jobId: string, score: number) => void
 }
 
-export default function JobSuggestionsPanel({ job }: JobSuggestionsPanelProps) {
+function changeMessage(change: ResumeChange): string {
+  if (change.type === 'skill_emphasized') {
+    return `Emphasize '${change.keyword}' in your "${change.experience_title}" experience.`
+  }
+  return change.message ?? ''
+}
+
+export default function JobSuggestionsPanel({ job, onScoreResolved }: JobSuggestionsPanelProps) {
   const [isDownloading, setIsDownloading] = useState(false)
 
-  const { data: analysis, isLoading } = useQuery({
-    queryKey: ['ats-analysis', job.job_id],
-    queryFn: () => getAtsAnalysis(job),
+  const { data: optimization, isLoading } = useQuery({
+    queryKey: ['resume-optimization', job.job_id],
+    queryFn: () => getResumeOptimization(job),
   })
+
+  // The list view's match_score is a cheaper text-only estimate (no JSearch
+  // job-details enrichment, to avoid N extra API calls per search). This call
+  // *does* enrich, so score_before is the more accurate number for this job —
+  // propagate it up so the card badge doesn't show a different score than the
+  // panel sitting right next to it.
+  useEffect(() => {
+    if (optimization) onScoreResolved?.(job.job_id, optimization.score_before)
+  }, [optimization, job.job_id, onScoreResolved])
 
   const handleDownload = () => {
     setIsDownloading(true)
@@ -56,18 +73,30 @@ export default function JobSuggestionsPanel({ job }: JobSuggestionsPanelProps) {
           <Skeleton className="h-14 w-full" />
           <Skeleton className="h-14 w-full" />
         </div>
-      ) : analysis ? (
+      ) : optimization ? (
         <>
-          <div className="flex items-center gap-2 mb-3 shrink-0">
-            <span className={`text-xl font-bold ${getMatchColor(analysis.score)}`}>{analysis.score}/10</span>
-            <span className="text-[11px] text-slate-400">match score</span>
+          <div className="flex items-center gap-1.5 mb-3 shrink-0">
+            <span className={`text-lg font-bold ${getMatchColor(optimization.score_before)}`}>
+              {optimization.score_before}/10
+            </span>
+            {optimization.score_after > optimization.score_before && (
+              <>
+                <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3 text-slate-400" />
+                <span className={`text-lg font-bold ${getMatchColor(optimization.score_after)}`}>
+                  {optimization.score_after}/10
+                </span>
+              </>
+            )}
+            <span className="text-[11px] text-slate-400 ml-0.5">
+              {optimization.score_after > optimization.score_before ? 'if you apply suggestions' : 'match score'}
+            </span>
           </div>
 
-          {analysis.suggestions.length > 0 ? (
+          {optimization.changes.length > 0 ? (
             <div className="space-y-2 flex-1 min-h-0 overflow-y-auto pr-1 mb-3">
-              {analysis.suggestions.map((s, i) => (
+              {optimization.changes.map((c, i) => (
                 <div key={i} className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-600">
-                  <span className="font-semibold text-slate-700">{categoryLabel(s.category)}:</span> {s.message}
+                  {changeMessage(c)}
                 </div>
               ))}
             </div>

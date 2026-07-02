@@ -1,8 +1,7 @@
 from app.models.profile import Profile
 
 REQUIRED_FIELDS = [
-    "full_name", "desired_title", "work_model", "location",
-    "experience_level", "work_authorization", "skills",
+    "full_name", "location", "experience_level", "skills",
 ]
 
 

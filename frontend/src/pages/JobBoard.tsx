@@ -36,6 +36,7 @@ export default function JobBoard() {
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set())
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
+  const [resolvedScores, setResolvedScores] = useState<Record<string, number>>({})
 
   const { data: profile } = useQuery<Profile>({ queryKey: ['profile'], queryFn: getProfile })
 
@@ -84,6 +85,10 @@ export default function JobBoard() {
       },
     })
   }, [savedJobIds, saveMutation])
+
+  const handleScoreResolved = useCallback((jobId: string, score: number) => {
+    setResolvedScores((prev) => (prev[jobId] === score ? prev : { ...prev, [jobId]: score }))
+  }, [])
 
   return (
     <motion.div
@@ -227,20 +232,26 @@ export default function JobBoard() {
               {submittedSearch && <> for &ldquo;{submittedSearch}&rdquo;</>}
               {' · suggested improvements shown for the top ' + SUGGESTIONS_PANEL_COUNT}
             </p>
-            {jobs.map((job, i) => (
-              <Fragment key={job.job_id}>
-                <div className={i >= SUGGESTIONS_PANEL_COUNT ? 'xl:col-span-2' : ''}>
-                  <JobCard
-                    job={job}
-                    index={i}
-                    onSave={handleSave}
-                    onViewDetails={(j) => { setSelectedJob(j); setDetailOpen(true) }}
-                    saved={savedJobIds.has(job.job_id)}
-                  />
-                </div>
-                {i < SUGGESTIONS_PANEL_COUNT && <JobSuggestionsPanel job={job} />}
-              </Fragment>
-            ))}
+            {jobs.map((job, i) => {
+              const resolvedScore = resolvedScores[job.job_id]
+              const cardJob = resolvedScore != null ? { ...job, match_score: resolvedScore } : job
+              return (
+                <Fragment key={job.job_id}>
+                  <div className={i >= SUGGESTIONS_PANEL_COUNT ? 'xl:col-span-2' : ''}>
+                    <JobCard
+                      job={cardJob}
+                      index={i}
+                      onSave={handleSave}
+                      onViewDetails={(j) => { setSelectedJob(j); setDetailOpen(true) }}
+                      saved={savedJobIds.has(job.job_id)}
+                    />
+                  </div>
+                  {i < SUGGESTIONS_PANEL_COUNT && (
+                    <JobSuggestionsPanel job={job} onScoreResolved={handleScoreResolved} />
+                  )}
+                </Fragment>
+              )
+            })}
           </>
         )}
       </div>

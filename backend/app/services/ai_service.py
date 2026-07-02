@@ -2,6 +2,14 @@ import json
 import httpx
 from app.core.config import settings
 
+# This module parses resumes via LLM prompting (OpenRouter -> Groq fallback).
+# It is kept as-is and importable, but the live /resume/upload endpoint
+# currently calls the non-prompting alternative instead — regex + a
+# TF-IDF/LogisticRegression section classifier + pretrained BERT NER + the
+# existing skill_service gazetteer — at app/ml_resume_parser/pipeline.py
+# (see its README.md for the algorithm rationale). Both return the same JSON
+# shape, so routers/resume.py can swap between them by changing one import.
+
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 

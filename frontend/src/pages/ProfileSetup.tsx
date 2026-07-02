@@ -11,12 +11,11 @@ import {
   faUser,
   faPhone,
   faLink,
+  faCode,
+  faAlignLeft,
   faBriefcase,
   faMapMarkerAlt,
-  faBuilding,
   faGraduationCap,
-  faIdCard,
-  faDollarSign,
   faCheck,
   faTags,
   faCloudUploadAlt,
@@ -38,13 +37,10 @@ const schema = z.object({
   full_name: z.string().optional(),
   phone: z.string().optional(),
   linkedin_url: z.string().optional(),
-  desired_title: z.string().min(1, 'Desired job title is required'),
+  github_url: z.string().optional(),
+  summary: z.string().optional(),
   location: z.string().min(1, 'Preferred location is required'),
-  work_model: z.enum(['remote', 'hybrid', 'on-site']),
   experience_level: z.enum(['entry', 'mid', 'senior', 'lead']),
-  work_authorization: z.string().min(1, 'Work authorization is required'),
-  salary_min: z.number().optional(),
-  salary_max: z.number().optional(),
   skills: z.string().optional(),
 })
 type FormFields = z.infer<typeof schema>
@@ -95,13 +91,10 @@ export default function ProfileSetup() {
           full_name: profile.full_name ?? '',
           phone: profile.phone ?? '',
           linkedin_url: profile.linkedin_url ?? '',
-          desired_title: profile.desired_title ?? '',
+          github_url: profile.github_url ?? '',
+          summary: profile.summary ?? '',
           location: profile.location ?? '',
-          work_model: profile.work_model || 'remote',
           experience_level: profile.experience_level || 'entry',
-          work_authorization: profile.work_authorization ?? '',
-          salary_min: profile.salary_min ?? undefined,
-          salary_max: profile.salary_max ?? undefined,
           skills: profile.skills?.join(', ') ?? '',
         }
       : undefined,
@@ -299,12 +292,34 @@ export default function ProfileSetup() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="text-sm font-semibold text-slate-700 mb-1.5 block">LinkedIn URL</label>
+                  <div className="relative">
+                    <FontAwesomeIcon icon={faLink} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input placeholder="https://linkedin.com/in/yourprofile" disabled={lockedFields.has('linkedin_url')} {...register('linkedin_url')}
+                      className={`w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-slate-700 mb-1.5 block">GitHub URL</label>
+                  <div className="relative">
+                    <FontAwesomeIcon icon={faCode} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input placeholder="https://github.com/yourusername" disabled={lockedFields.has('github_url')} {...register('github_url')}
+                      className={`w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
+                  </div>
+                </div>
+              </div>
+
               <div>
-                <label className="text-sm font-semibold text-slate-700 mb-1.5 block">LinkedIn URL</label>
+                <label className="text-sm font-semibold text-slate-700 mb-1.5 block">
+                  Professional Summary
+                  {lockedFields.has('summary') && <span className="text-xs text-slate-400 font-normal"> — from your resume</span>}
+                </label>
                 <div className="relative">
-                  <FontAwesomeIcon icon={faLink} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input placeholder="https://linkedin.com/in/yourprofile" disabled={lockedFields.has('linkedin_url')} {...register('linkedin_url')}
-                    className={`w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
+                  <FontAwesomeIcon icon={faAlignLeft} className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
+                  <textarea placeholder="A short summary of your professional background" rows={3} disabled={lockedFields.has('summary')} {...register('summary')}
+                    className={`w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none ${lockedInputClass}`} />
                 </div>
               </div>
 
@@ -316,95 +331,34 @@ export default function ProfileSetup() {
                   <h3 className="text-base font-bold text-slate-900">Job Preferences</h3>
                 </div>
 
-                <div className="space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="text-sm font-semibold text-slate-700 mb-1.5 block">
-                      Desired Job Title <span className="text-red-400">*</span>
-                    </label>
+                    <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Preferred Location <span className="text-red-400">*</span></label>
                     <div className="relative">
-                      <FontAwesomeIcon icon={faBriefcase} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <input placeholder="e.g. Senior Frontend Engineer" {...register('desired_title')}
-                        className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+                      <FontAwesomeIcon icon={faMapMarkerAlt} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input placeholder="e.g. Kathmandu, Nepal" disabled={lockedFields.has('location')} {...register('location')}
+                        className={`w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
                     </div>
-                    {errors.desired_title && <p className="text-xs text-red-500 mt-1.5 ml-1">{errors.desired_title.message}</p>}
+                    {errors.location && <p className="text-xs text-red-500 mt-1.5 ml-1">{errors.location.message}</p>}
                   </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                      <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Preferred Location <span className="text-red-400">*</span></label>
-                      <div className="relative">
-                        <FontAwesomeIcon icon={faMapMarkerAlt} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <input placeholder="e.g. Kathmandu, Nepal" {...register('location')}
-                          className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
-                      </div>
-                      {errors.location && <p className="text-xs text-red-500 mt-1.5 ml-1">{errors.location.message}</p>}
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Work Model <span className="text-red-400">*</span></label>
-                      <div className="relative">
-                        <FontAwesomeIcon icon={faBuilding} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
-                        <Select
-                          value={profile?.work_model ?? undefined}
-                          onValueChange={(v) => setValue('work_model', v as 'remote' | 'hybrid' | 'on-site')}
-                        >
-                          <SelectTrigger className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
-                            <SelectValue placeholder="Select..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="remote">Remote</SelectItem>
-                            <SelectItem value="hybrid">Hybrid</SelectItem>
-                            <SelectItem value="on-site">On-site</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                      <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Experience Level <span className="text-red-400">*</span></label>
-                      <div className="relative">
-                        <FontAwesomeIcon icon={faGraduationCap} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
-                        <Select
-                          value={profile?.experience_level ?? undefined}
-                          onValueChange={(v) => setValue('experience_level', v as 'entry' | 'mid' | 'senior' | 'lead')}
-                        >
-                          <SelectTrigger className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
-                            <SelectValue placeholder="Select..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="entry">Entry</SelectItem>
-                            <SelectItem value="mid">Mid</SelectItem>
-                            <SelectItem value="senior">Senior</SelectItem>
-                            <SelectItem value="lead">Lead</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Work Authorization <span className="text-red-400">*</span></label>
-                      <div className="relative">
-                        <FontAwesomeIcon icon={faIdCard} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <input placeholder="e.g. Nepali Citizen" {...register('work_authorization')}
-                          className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
-                      </div>
-                      {errors.work_authorization && <p className="text-xs text-red-500 mt-1.5 ml-1">{errors.work_authorization.message}</p>}
-                    </div>
-                  </div>
-
                   <div>
-                    <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Salary Range</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="relative">
-                        <FontAwesomeIcon icon={faDollarSign} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <input type="number" placeholder="Min" {...register('salary_min', { valueAsNumber: true })}
-                          className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
-                      </div>
-                      <div className="relative">
-                        <FontAwesomeIcon icon={faDollarSign} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <input type="number" placeholder="Max" {...register('salary_max', { valueAsNumber: true })}
-                          className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
-                      </div>
+                    <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Experience Level <span className="text-red-400">*</span></label>
+                    <div className="relative">
+                      <FontAwesomeIcon icon={faGraduationCap} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
+                      <Select
+                        value={profile?.experience_level ?? undefined}
+                        onValueChange={(v) => setValue('experience_level', v as 'entry' | 'mid' | 'senior' | 'lead')}
+                      >
+                        <SelectTrigger className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+                          <SelectValue placeholder="Select..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="entry">Entry</SelectItem>
+                          <SelectItem value="mid">Mid</SelectItem>
+                          <SelectItem value="senior">Senior</SelectItem>
+                          <SelectItem value="lead">Lead</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>

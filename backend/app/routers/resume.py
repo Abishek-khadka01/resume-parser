@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Body, Depends, UploadFile, File, HTTPException
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.dependencies import get_current_user
 from app.models.user import User
 from app.models.profile import Profile, WorkExperience, Education
 from app.schemas.profile import ProfileOut
-from app.services.ai_service import parse_resume_text
+# ai_service.parse_resume_text (LLM prompting) stays available and unchanged;
+# the live endpoint below currently calls the non-prompting ML pipeline
+# instead — see app/ml_resume_parser/README.md for the algorithm rationale.
+from app.services.ai_service import parse_resume_text  # noqa: F401  (kept as the prompting-based alternative)
+from app.ml_resume_parser.pipeline import parse_resume as parse_resume_ml
 from app.services.job_service import get_job_details
 from app.services.profile_service import calculate_completeness
 from app.services import skill_service, pdf_service, resume_optimizer_service
@@ -13,7 +18,7 @@ import io
 
 router = APIRouter()
 
-LOCKABLE_FIELDS = ("full_name", "phone", "linkedin_url", "skills")
+LOCKABLE_FIELDS = ("full_name", "phone", "linkedin_url", "github_url", "location", "summary", "skills")
 
 
 @router.post("/upload", response_model=ProfileOut)
@@ -28,14 +33,17 @@ async def upload_resume(
     content = await file.read()
     text = _extract_text(content, file.content_type)
 
-    parsed = await parse_resume_text(text)
+    # Blocking (regex/sklearn/torch) work, so run off the event loop.
+    parsed = await run_in_threadpool(parse_resume_ml, text)
 
     profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
     if not profile:
         profile = Profile(user_id=current_user.id)
         db.add(profile)
 
-    for field in ("full_name", "phone", "linkedin_url", "location", "skills"):
+    profile.resume_raw_text = text
+
+    for field in ("full_name", "phone", "linkedin_url", "github_url", "location", "summary", "skills"):
         val = parsed.get(field)
         if val:
             setattr(profile, field, val)
@@ -47,39 +55,29 @@ async def upload_resume(
     profile.resume_locked_fields = sorted(set(profile.resume_locked_fields or []) | newly_locked)
     profile.resume_uploaded = True
 
+    # desired_title has no manual UI field anymore — derive it from the most
+    # recent role so job search/ATS scoring (which read profile.desired_title)
+    # keep working off the resume itself instead of a form nobody fills in.
+    work_experience = parsed.get("work_experience", [])
+    if not profile.desired_title and work_experience:
+        profile.desired_title = work_experience[0].get("title") or profile.desired_title
+
     db.query(WorkExperience).filter(WorkExperience.profile_id == profile.id).delete()
-    for exp in parsed.get("work_experience", []):
+    for exp in work_experience:
         db.add(WorkExperience(profile_id=profile.id, **exp))
 
     db.query(Education).filter(Education.profile_id == profile.id).delete()
     for edu in parsed.get("education", []):
         db.add(Education(profile_id=profile.id, **edu))
 
+    # calculate_completeness reads profile.work_experience/education off the
+    # ORM relationship — flush so it sees the rows just added above instead
+    # of whatever was (or wasn't) loaded before this request's inserts.
+    db.flush()
     profile.completeness_pct = calculate_completeness(profile)
     db.commit()
     db.refresh(profile)
     return profile
-
-
-@router.post("/enhanced-pdf")
-def download_enhanced_resume(
-    accepted_suggestions: list[dict] | None = Body(default=None, embed=True),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    from fastapi.responses import Response
-
-    profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
-    if not profile:
-        raise HTTPException(status_code=404, detail="Profile not found")
-
-    pdf_bytes = pdf_service.build_enhanced_resume_pdf(profile, accepted_suggestions)
-    filename = f"{(profile.full_name or 'resume').replace(' ', '_')}_resume.pdf"
-    return Response(
-        content=pdf_bytes,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-    )
 
 
 @router.post("/optimized-pdf")

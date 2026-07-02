@@ -2,18 +2,17 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faDownload, faExternalLinkAlt, faWandMagicSparkles, faArrowRight, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faExternalLinkAlt, faWandMagicSparkles, faArrowRight, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getAtsAnalysis, downloadEnhancedResume, getResumeOptimization, downloadOptimizedResume } from '@/services/api'
+import { getAtsAnalysis, getResumeOptimization, downloadOptimizedResume } from '@/services/api'
 import { getMatchColor, categoryLabel } from '@/lib/utils'
 import type { Job } from '@/types'
 
@@ -38,26 +37,6 @@ export default function JobDetailModal({ job, open, onOpenChange }: JobDetailMod
     queryFn: () => getResumeOptimization(job as Job),
     enabled: open && !!job && activeTab === 'optimize',
   })
-
-  const handleDownload = async () => {
-    toast.promise(
-      downloadEnhancedResume(analysis?.suggestions).then((blob) => {
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = 'enhanced_resume.pdf'
-        document.body.appendChild(a)
-        a.click()
-        a.remove()
-        URL.revokeObjectURL(url)
-      }),
-      {
-        loading: 'Generating enhanced resume...',
-        success: 'Resume downloaded',
-        error: 'Failed to generate resume',
-      }
-    )
-  }
 
   const handleDownloadOptimized = async () => {
     if (!job) return
@@ -277,16 +256,6 @@ export default function JobDetailModal({ job, open, onOpenChange }: JobDetailMod
             )}
           </TabsContent>
         </Tabs>
-
-        <DialogFooter>
-          <button
-            onClick={handleDownload}
-            className="inline-flex items-center gap-2 h-9 px-5 rounded-full bg-linear-to-r from-[#4a0080] via-primary to-secondary hover:from-secondary hover:via-primary hover:to-[#4a0080] text-white text-xs font-bold tracking-wide shadow-sm transition-all duration-300 cursor-pointer"
-          >
-            <FontAwesomeIcon icon={faDownload} className="w-3 h-3" />
-            Download Enhanced Resume
-          </button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
