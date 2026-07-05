@@ -97,29 +97,29 @@ export default function JobBoard() {
       className="flex flex-col gap-6"
     >
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <h2 className="text-2xl font-bold text-slate-900">Job Board</h2>
+        <h2 className="text-2xl font-semibold text-foreground">Job Board</h2>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-6 items-stretch">
-        <div className="xl:col-span-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="xl:col-span-2 rounded-xl border border-border bg-card p-4">
           <form onSubmit={handleSearch} className="flex items-center gap-3">
             <div className="relative flex-1">
               <FontAwesomeIcon
                 icon={faSearch}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
               />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search jobs by title, skill, or keyword..."
-                className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                className="w-full h-11 rounded-lg border border-border bg-muted/50 pl-11 pr-4 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
               />
               {search && (
                 <button
                   type="button"
                   onClick={() => { setSearch(''); setSubmittedSearch('') }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground/70 cursor-pointer"
                 >
                   <FontAwesomeIcon icon={faTimes} className="w-3.5 h-3.5" />
                 </button>
@@ -127,7 +127,7 @@ export default function JobBoard() {
             </div>
             <button
               type="submit"
-              className="h-11 px-6 rounded-xl bg-linear-to-r from-[#4a0080] via-primary to-secondary hover:from-secondary hover:via-primary hover:to-[#4a0080] text-white text-sm font-bold tracking-wide shadow-sm transition-all duration-300 cursor-pointer"
+              className="h-11 px-6 rounded-lg bg-primary hover:bg-primary-dark text-primary-foreground text-sm font-semibold transition-colors cursor-pointer"
             >
               <FontAwesomeIcon icon={faSearch} className="w-4 h-4 mr-2" />
               Search
@@ -135,10 +135,10 @@ export default function JobBoard() {
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`h-11 px-4 rounded-xl border transition-all cursor-pointer ${
+              className={`h-11 px-4 rounded-lg border transition-colors cursor-pointer ${
                 filtersVisible || effectiveExperienceLevel
                   ? 'border-primary/30 text-primary bg-primary/5'
-                  : 'border-slate-200 text-slate-500 hover:text-primary hover:border-primary/30'
+                  : 'border-border text-muted-foreground hover:text-primary hover:border-primary/30'
               }`}
             >
               <FontAwesomeIcon icon={faSlidersH} className="w-4 h-4" />
@@ -146,8 +146,8 @@ export default function JobBoard() {
           </form>
 
           {filtersVisible && (
-            <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-slate-100">
-              <span className="text-xs font-semibold text-slate-500 mr-1">Experience level:</span>
+            <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-border">
+              <span className="text-xs font-semibold text-muted-foreground mr-1">Experience level:</span>
               {EXPERIENCE_LEVELS.map((lvl) => (
                 <button
                   key={lvl.value}
@@ -156,17 +156,17 @@ export default function JobBoard() {
                     setUserSetExperienceLevel(true)
                     setExperienceLevel(effectiveExperienceLevel === lvl.value ? '' : lvl.value)
                   }}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors cursor-pointer ${
                     effectiveExperienceLevel === lvl.value
-                      ? 'bg-primary text-white border-primary'
-                      : 'bg-white text-slate-500 border-slate-200 hover:border-primary/30 hover:text-primary'
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-transparent text-muted-foreground border-border hover:border-primary/30 hover:text-primary'
                   }`}
                 >
                   {lvl.label}
                 </button>
               ))}
               {!userSetExperienceLevel && effectiveExperienceLevel === 'entry' && (
-                <span className="text-xs text-slate-400 italic">auto-applied based on your resume</span>
+                <span className="text-xs text-muted-foreground italic">auto-applied based on your resume</span>
               )}
             </div>
           )}
@@ -175,9 +175,9 @@ export default function JobBoard() {
         {isLoading ? (
           <div className="xl:col-span-2 flex flex-col gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+              <div key={i} className="rounded-xl border border-border bg-card p-5 space-y-4">
                 <div className="flex items-start gap-4">
-                  <Skeleton className="w-12 h-12 rounded-xl shrink-0" />
+                  <Skeleton className="w-12 h-12 rounded-lg shrink-0" />
                   <div className="flex-1 space-y-2">
                     <Skeleton className="h-5 w-3/4" />
                     <Skeleton className="h-4 w-1/2" />
@@ -186,8 +186,8 @@ export default function JobBoard() {
                 <Skeleton className="h-3 w-full" />
                 <Skeleton className="h-3 w-5/6" />
                 <div className="flex gap-2 pt-2">
-                  <Skeleton className="h-8 w-20 rounded-full" />
-                  <Skeleton className="h-8 w-24 rounded-full" />
+                  <Skeleton className="h-8 w-20 rounded-lg" />
+                  <Skeleton className="h-8 w-24 rounded-lg" />
                 </div>
               </div>
             ))}
@@ -196,18 +196,18 @@ export default function JobBoard() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="xl:col-span-2 text-center py-20 rounded-2xl border border-dashed border-red-200 bg-red-50/30"
+            className="xl:col-span-2 text-center py-20 rounded-xl border border-dashed border-destructive/25 bg-destructive/5"
           >
-            <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
-              <FontAwesomeIcon icon={faTriangleExclamation} className="w-7 h-7 text-red-400" />
+            <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+              <FontAwesomeIcon icon={faTriangleExclamation} className="w-5 h-5 text-destructive" />
             </div>
-            <p className="text-sm font-semibold text-red-500">Couldn't load jobs</p>
-            <p className="text-xs text-slate-400 mt-1">The job search provider didn't respond in time. Please try again.</p>
+            <p className="text-sm font-medium text-destructive">Couldn't load jobs</p>
+            <p className="text-sm text-muted-foreground mt-1">The job search provider didn't respond in time. Please try again.</p>
             <button
               type="button"
               onClick={() => refetch()}
               disabled={isFetching}
-              className="mt-4 inline-flex items-center gap-2 h-9 px-5 rounded-full bg-primary text-white text-xs font-bold tracking-wide transition-all disabled:opacity-60 cursor-pointer"
+              className="mt-4 inline-flex items-center gap-2 h-9 px-5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold transition-colors disabled:opacity-60 cursor-pointer"
             >
               <FontAwesomeIcon icon={faRotateRight} className={isFetching ? 'w-3 h-3 animate-spin' : 'w-3 h-3'} />
               {isFetching ? 'Retrying...' : 'Retry'}
@@ -217,17 +217,17 @@ export default function JobBoard() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="xl:col-span-2 text-center py-20 rounded-2xl border border-dashed border-slate-200 bg-white"
+            className="xl:col-span-2 text-center py-20 rounded-xl border border-dashed border-border bg-card"
           >
-            <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4">
-              <FontAwesomeIcon icon={faBriefcase} className="w-7 h-7 text-slate-300" />
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+              <FontAwesomeIcon icon={faBriefcase} className="w-5 h-5 text-muted-foreground" />
             </div>
-            <p className="text-sm font-semibold text-slate-400">No jobs found</p>
-            <p className="text-xs text-slate-300 mt-1">Try adjusting your search criteria</p>
+            <p className="text-sm font-medium text-foreground/80">No jobs found</p>
+            <p className="text-sm text-muted-foreground mt-1">Try adjusting your search criteria</p>
           </motion.div>
         ) : (
           <>
-            <p className="xl:col-span-2 text-xs text-slate-400 font-medium">
+            <p className="xl:col-span-2 text-xs text-muted-foreground font-medium">
               {jobs.length} job{jobs.length !== 1 ? 's' : ''} found
               {submittedSearch && <> for &ldquo;{submittedSearch}&rdquo;</>}
               {' · suggested improvements shown for the top ' + SUGGESTIONS_PANEL_COUNT}

@@ -49,27 +49,27 @@ export default function JobCard({ job, onSave, onViewDetails, saved, index = 0 }
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-all duration-200"
+      transition={{ duration: 0.3, delay: index * 0.04 }}
+      className="rounded-xl border border-border bg-card p-5 hover:border-primary/25 transition-colors duration-200"
     >
       <div className="flex items-start gap-4">
         {job.employer_logo ? (
           <img
             src={job.employer_logo}
             alt={job.employer_name}
-            className="w-12 h-12 rounded-xl object-contain border border-slate-100 shrink-0"
+            className="w-11 h-11 rounded-lg object-contain border border-border shrink-0"
           />
         ) : (
-          <div className="w-12 h-12 rounded-xl bg-linear-to-br from-[#4a0080] to-primary flex items-center justify-center text-white text-lg font-bold shrink-0">
+          <div className="w-11 h-11 rounded-lg bg-primary flex items-center justify-center text-primary-foreground text-base font-semibold shrink-0">
             {job.employer_name?.charAt(0) ?? 'J'}
           </div>
         )}
 
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-bold text-slate-900 leading-tight line-clamp-2">
+          <h3 className="text-base font-semibold text-foreground leading-tight line-clamp-2">
             {job.job_title}
           </h3>
-          <div className="flex items-center gap-2 mt-1 text-sm text-slate-500">
+          <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
             <FontAwesomeIcon icon={faBuilding} className="w-3 h-3 shrink-0" />
             <span className="truncate">{job.employer_name}</span>
           </div>
@@ -77,35 +77,30 @@ export default function JobCard({ job, onSave, onViewDetails, saved, index = 0 }
 
         {job.match_score != null && (
           <div className="flex flex-col items-center shrink-0 ml-2">
-            <div className="relative w-14 h-14">
-              <svg className="w-14 h-14 -rotate-90" viewBox="0 0 36 36">
+            <div className="relative w-12 h-12">
+              <svg className="w-12 h-12 -rotate-90" viewBox="0 0 36 36">
                 <circle
                   cx="18" cy="18" r="15.5"
-                  fill="none" stroke="#e2e8f0" strokeWidth="3"
+                  fill="none" stroke="var(--color-muted)" strokeWidth="3"
                 />
                 <circle
                   cx="18" cy="18" r="15.5"
                   fill="none"
-                  stroke={job.match_score >= 8 ? '#059669' : job.match_score >= 5 ? '#d97706' : '#dc2626'}
+                  stroke={job.match_score >= 8 ? '#0d8f5f' : job.match_score >= 5 ? '#b5750f' : '#b3362a'}
                   strokeWidth="3"
                   strokeDasharray={`${(job.match_score / 10) * 97} 97`}
                   strokeLinecap="round"
                 />
               </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold"
-                style={{
-                  color: job.match_score >= 8 ? '#059669' : job.match_score >= 5 ? '#d97706' : '#dc2626'
-                }}
-              >
+              <span className="absolute inset-0 flex items-center justify-center text-[11px] font-semibold text-foreground">
                 {job.match_score}/10
               </span>
             </div>
-            <span className="text-[10px] text-slate-400 font-medium mt-0.5">Match</span>
           </div>
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-4 text-xs text-slate-500">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-4 text-xs text-muted-foreground">
         {job.job_city && (
           <span className="flex items-center gap-1.5">
             <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" />
@@ -113,7 +108,7 @@ export default function JobCard({ job, onSave, onViewDetails, saved, index = 0 }
           </span>
         )}
         {job.job_is_remote && (
-          <span className="inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold px-2 py-0.5 border border-emerald-200">
+          <span className="inline-flex items-center rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-medium px-1.5 py-0.5">
             Remote
           </span>
         )}
@@ -137,16 +132,16 @@ export default function JobCard({ job, onSave, onViewDetails, saved, index = 0 }
         )}
       </div>
 
-      <p className="mt-3 text-sm text-slate-600 line-clamp-2 leading-relaxed">
+      <p className="mt-3 text-sm text-muted-foreground line-clamp-2 leading-relaxed">
         {job.job_description}
       </p>
 
-      <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100">
+      <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border">
         <a
           href={job.job_apply_link}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 h-9 px-5 rounded-full bg-linear-to-r from-[#4a0080] via-primary to-secondary hover:from-secondary hover:via-primary hover:to-[#4a0080] text-white text-xs font-bold tracking-wide shadow-sm transition-all duration-300"
+          className="inline-flex items-center gap-2 h-8 px-4 rounded-lg bg-primary hover:bg-primary-dark text-primary-foreground text-xs font-semibold transition-colors"
         >
           <FontAwesomeIcon icon={faExternalLinkAlt} className="w-3 h-3" />
           Apply
@@ -155,10 +150,10 @@ export default function JobCard({ job, onSave, onViewDetails, saved, index = 0 }
         <button
           onClick={() => onSave?.(job)}
           className={cn(
-            'inline-flex items-center gap-2 h-9 px-5 rounded-full text-xs font-bold border transition-all duration-300 cursor-pointer',
+            'inline-flex items-center gap-2 h-8 px-4 rounded-lg text-xs font-semibold border transition-colors cursor-pointer',
             saved
-              ? 'bg-primary/8 text-primary border-primary/20'
-              : 'bg-white text-slate-600 border-slate-200 hover:border-primary/30 hover:text-primary'
+              ? 'bg-accent text-accent-foreground border-transparent'
+              : 'bg-transparent text-muted-foreground border-border hover:border-primary/30 hover:text-primary'
           )}
         >
           <FontAwesomeIcon icon={saved ? faCheckCircle : faBookmark} className="w-3 h-3" />
@@ -168,11 +163,11 @@ export default function JobCard({ job, onSave, onViewDetails, saved, index = 0 }
         {job.match_score != null && (
           <button
             onClick={() => onViewDetails?.(job)}
-            className="ml-auto inline-flex items-center gap-2 h-9 px-4 rounded-full text-xs font-semibold text-slate-500 hover:text-primary hover:bg-primary/8 border border-slate-200 hover:border-primary/20 transition-all duration-200 cursor-pointer"
+            className="ml-auto inline-flex items-center gap-2 h-8 px-3.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-primary hover:bg-accent transition-colors cursor-pointer"
             title="ATS Analysis"
           >
             <FontAwesomeIcon icon={faChartLine} className="w-3 h-3" />
-            <span className={cn('font-bold', getMatchColor(job.match_score))}>
+            <span className={cn('font-semibold', getMatchColor(job.match_score))}>
               {job.match_score}/10 match
             </span>
           </button>

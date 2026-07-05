@@ -13,7 +13,6 @@ import {
   faLink,
   faCode,
   faAlignLeft,
-  faBriefcase,
   faMapMarkerAlt,
   faGraduationCap,
   faCheck,
@@ -159,7 +158,7 @@ export default function ProfileSetup() {
   const skillsList = profile?.skills ?? []
   const lockedFields = new Set(profile?.resume_locked_fields ?? [])
   const anyFieldLocked = lockedFields.size > 0
-  const lockedInputClass = 'disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed disabled:border-slate-200'
+  const lockedInputClass = 'disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed disabled:border-border'
 
   if (isLoading) {
     return (
@@ -167,11 +166,11 @@ export default function ProfileSetup() {
         <Skeleton className="h-8 w-48" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
-            <Skeleton className="h-80 w-full rounded-2xl" />
+            <Skeleton className="h-80 w-full rounded-xl" />
           </div>
           <div className="space-y-4">
-            <Skeleton className="h-32 w-full rounded-2xl" />
-            <Skeleton className="h-48 w-full rounded-2xl" />
+            <Skeleton className="h-32 w-full rounded-xl" />
+            <Skeleton className="h-48 w-full rounded-xl" />
           </div>
         </div>
       </div>
@@ -187,7 +186,7 @@ export default function ProfileSetup() {
       className="flex flex-col gap-6"
     >
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <h2 className="text-2xl font-bold text-slate-900">Profile Setup</h2>
+        <h2 className="text-2xl font-semibold text-foreground">Profile Setup</h2>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -198,10 +197,10 @@ export default function ProfileSetup() {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onClick={handleUploadClick}
-              className={`rounded-2xl border-2 border-dashed p-8 text-center cursor-pointer transition-all duration-200 ${
+              className={`rounded-xl border-2 border-dashed p-8 text-center cursor-pointer transition-all duration-200 ${
                 dragOver
                   ? 'border-primary bg-primary/5'
-                  : 'border-slate-200 bg-white hover:border-primary/30 hover:bg-primary/3'
+                  : 'border-border bg-card hover:border-primary/30 hover:bg-primary/3'
               }`}
             >
               <input
@@ -217,8 +216,8 @@ export default function ProfileSetup() {
               {uploading ? (
                 <div className="flex flex-col items-center gap-3">
                   <FontAwesomeIcon icon={faSpinner} className="w-10 h-10 text-primary animate-spin" />
-                  <p className="text-sm font-semibold text-slate-600">{UPLOAD_STAGES[uploadStage]}</p>
-                  <p className="text-xs text-slate-400">{uploadSeconds}s elapsed</p>
+                  <p className="text-sm font-semibold text-foreground/70">{UPLOAD_STAGES[uploadStage]}</p>
+                  <p className="text-xs text-muted-foreground">{uploadSeconds}s elapsed</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-3">
@@ -226,22 +225,22 @@ export default function ProfileSetup() {
                     <FontAwesomeIcon icon={faCloudUploadAlt} className="w-7 h-7 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-700">
+                    <p className="text-sm font-semibold text-foreground/80">
                       Drop your resume here or click to browse
                     </p>
-                    <p className="text-xs text-slate-400 mt-1">Supports PDF and DOCX formats</p>
+                    <p className="text-xs text-muted-foreground mt-1">Supports PDF and DOCX formats</p>
                   </div>
                 </div>
               )}
             </div>
           )}
 
-          <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1 w-fit">
+          <div className="flex items-center gap-2 bg-muted rounded-lg p-1 w-fit">
             <button
               type="button"
               onClick={() => setInputMode('upload')}
               className={`px-4 py-2 text-sm font-semibold rounded-md transition-all cursor-pointer ${
-                inputMode === 'upload' ? 'bg-white text-[#4a0080] shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                inputMode === 'upload' ? 'bg-card text-primary' : 'text-muted-foreground hover:text-foreground/80'
               }`}
             >
               <FontAwesomeIcon icon={faCloudUploadAlt} className="w-3.5 h-3.5 mr-2" />
@@ -251,7 +250,7 @@ export default function ProfileSetup() {
               type="button"
               onClick={() => setInputMode('manual')}
               className={`px-4 py-2 text-sm font-semibold rounded-md transition-all cursor-pointer ${
-                inputMode === 'manual' ? 'bg-white text-[#4a0080] shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                inputMode === 'manual' ? 'bg-card text-primary' : 'text-muted-foreground hover:text-foreground/80'
               }`}
             >
               <FontAwesomeIcon icon={faFileAlt} className="w-3.5 h-3.5 mr-2" />
@@ -259,97 +258,87 @@ export default function ProfileSetup() {
             </button>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex items-center gap-2.5 mb-6">
-              <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center">
-                <FontAwesomeIcon icon={faUser} className="w-4 h-4 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900">Personal Information</h3>
-                {anyFieldLocked && (
-                  <p className="text-xs text-slate-400 mt-0.5">Fields filled from your resume are locked — upload a new resume to change them</p>
-                )}
-              </div>
+          <div className="rounded-xl border border-border bg-card p-6">
+            <div className="mb-6">
+              <h3 className="text-base font-semibold text-foreground">Personal information</h3>
+              {anyFieldLocked && (
+                <p className="text-sm text-muted-foreground mt-0.5">Fields filled from your resume are locked — upload a new resume to change them</p>
+              )}
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Full Name</label>
+                  <label className="text-sm font-semibold text-foreground/80 mb-1.5 block">Full Name</label>
                   <div className="relative">
-                    <FontAwesomeIcon icon={faUser} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <FontAwesomeIcon icon={faUser} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input placeholder="Your full name" disabled={lockedFields.has('full_name')} {...register('full_name')}
-                      className={`w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
+                      className={`w-full h-11 rounded-xl border border-border bg-muted/50 pl-11 pr-4 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Phone</label>
+                  <label className="text-sm font-semibold text-foreground/80 mb-1.5 block">Phone</label>
                   <div className="relative">
-                    <FontAwesomeIcon icon={faPhone} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <FontAwesomeIcon icon={faPhone} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input placeholder="+977 98XXXXXXXX" disabled={lockedFields.has('phone')} {...register('phone')}
-                      className={`w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
+                      className={`w-full h-11 rounded-xl border border-border bg-muted/50 pl-11 pr-4 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="text-sm font-semibold text-slate-700 mb-1.5 block">LinkedIn URL</label>
+                  <label className="text-sm font-semibold text-foreground/80 mb-1.5 block">LinkedIn URL</label>
                   <div className="relative">
-                    <FontAwesomeIcon icon={faLink} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <FontAwesomeIcon icon={faLink} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input placeholder="https://linkedin.com/in/yourprofile" disabled={lockedFields.has('linkedin_url')} {...register('linkedin_url')}
-                      className={`w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
+                      className={`w-full h-11 rounded-xl border border-border bg-muted/50 pl-11 pr-4 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-semibold text-slate-700 mb-1.5 block">GitHub URL</label>
+                  <label className="text-sm font-semibold text-foreground/80 mb-1.5 block">GitHub URL</label>
                   <div className="relative">
-                    <FontAwesomeIcon icon={faCode} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <FontAwesomeIcon icon={faCode} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input placeholder="https://github.com/yourusername" disabled={lockedFields.has('github_url')} {...register('github_url')}
-                      className={`w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
+                      className={`w-full h-11 rounded-xl border border-border bg-muted/50 pl-11 pr-4 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-semibold text-slate-700 mb-1.5 block">
+                <label className="text-sm font-semibold text-foreground/80 mb-1.5 block">
                   Professional Summary
-                  {lockedFields.has('summary') && <span className="text-xs text-slate-400 font-normal"> — from your resume</span>}
+                  {lockedFields.has('summary') && <span className="text-xs text-muted-foreground font-normal"> — from your resume</span>}
                 </label>
                 <div className="relative">
-                  <FontAwesomeIcon icon={faAlignLeft} className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
+                  <FontAwesomeIcon icon={faAlignLeft} className="absolute left-4 top-3.5 w-4 h-4 text-muted-foreground" />
                   <textarea placeholder="A short summary of your professional background" rows={3} disabled={lockedFields.has('summary')} {...register('summary')}
-                    className={`w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none ${lockedInputClass}`} />
+                    className={`w-full rounded-xl border border-border bg-muted/50 pl-11 pr-4 py-3 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none ${lockedInputClass}`} />
                 </div>
               </div>
 
-              <div className="border-t border-slate-100 pt-5">
-                <div className="flex items-center gap-2.5 mb-5">
-                  <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center">
-                    <FontAwesomeIcon icon={faBriefcase} className="w-4 h-4 text-primary" />
-                  </div>
-                  <h3 className="text-base font-bold text-slate-900">Job Preferences</h3>
-                </div>
+              <div className="border-t border-border pt-5">
+                <h3 className="text-base font-semibold text-foreground mb-5">Job preferences</h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Preferred Location <span className="text-red-400">*</span></label>
+                    <label className="text-sm font-semibold text-foreground/80 mb-1.5 block">Preferred Location <span className="text-destructive">*</span></label>
                     <div className="relative">
-                      <FontAwesomeIcon icon={faMapMarkerAlt} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <FontAwesomeIcon icon={faMapMarkerAlt} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input placeholder="e.g. Kathmandu, Nepal" disabled={lockedFields.has('location')} {...register('location')}
-                        className={`w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
+                        className={`w-full h-11 rounded-xl border border-border bg-muted/50 pl-11 pr-4 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
                     </div>
-                    {errors.location && <p className="text-xs text-red-500 mt-1.5 ml-1">{errors.location.message}</p>}
+                    {errors.location && <p className="text-xs text-destructive mt-1.5 ml-1">{errors.location.message}</p>}
                   </div>
                   <div>
-                    <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Experience Level <span className="text-red-400">*</span></label>
+                    <label className="text-sm font-semibold text-foreground/80 mb-1.5 block">Experience Level <span className="text-destructive">*</span></label>
                     <div className="relative">
-                      <FontAwesomeIcon icon={faGraduationCap} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
+                      <FontAwesomeIcon icon={faGraduationCap} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
                       <Select
                         value={profile?.experience_level ?? undefined}
                         onValueChange={(v) => setValue('experience_level', v as 'entry' | 'mid' | 'senior' | 'lead')}
                       >
-                        <SelectTrigger className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+                        <SelectTrigger className="w-full h-11 rounded-xl border border-border bg-muted/50 pl-11 pr-4 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
                           <SelectValue placeholder="Select..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -364,71 +353,66 @@ export default function ProfileSetup() {
                 </div>
               </div>
 
-              <div className="border-t border-slate-100 pt-5">
-                <label className="text-sm font-semibold text-slate-700 mb-1.5 block">
-                  Skills <span className="text-xs text-slate-400 font-normal">(comma-separated)</span>
-                  {lockedFields.has('skills') && <span className="text-xs text-slate-400 font-normal"> — from your resume</span>}
+              <div className="border-t border-border pt-5">
+                <label className="text-sm font-semibold text-foreground/80 mb-1.5 block">
+                  Skills <span className="text-xs text-muted-foreground font-normal">(comma-separated)</span>
+                  {lockedFields.has('skills') && <span className="text-xs text-muted-foreground font-normal"> — from your resume</span>}
                 </label>
                 <div className="relative">
-                  <FontAwesomeIcon icon={faTags} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <FontAwesomeIcon icon={faTags} className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input placeholder="React, TypeScript, Python, ..." disabled={lockedFields.has('skills')} {...register('skills')}
-                    className={`w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
+                    className={`w-full h-11 rounded-xl border border-border bg-muted/50 pl-11 pr-4 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all ${lockedInputClass}`} />
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting || updateMutation.isPending}
-                className="w-full h-11 rounded-full bg-linear-to-r from-[#4a0080] via-primary to-secondary hover:from-secondary hover:via-primary hover:to-[#4a0080] text-white text-sm font-bold tracking-wide shadow-lg shadow-primary/20 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-2"
+                className="w-full h-11 rounded-xl bg-primary hover:bg-primary-dark text-primary-foreground text-sm font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-2"
               >
                 <FontAwesomeIcon icon={faCheck} className="w-4 h-4" />
-                {updateMutation.isPending ? 'Saving...' : 'Save Profile'}
+                {updateMutation.isPending ? 'Saving...' : 'Save profile'}
               </button>
             </form>
           </div>
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-border bg-card p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-slate-600 uppercase tracking-wide">Completeness</h3>
-              <span className="text-xs font-bold text-primary bg-primary/8 px-2.5 py-1 rounded-full">
+              <h3 className="text-sm font-medium text-muted-foreground">Completeness</h3>
+              <span className="text-sm font-semibold text-primary">
                 {completeness}%
               </span>
             </div>
-            <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden mb-3">
+            <div className="w-full h-2 rounded-full bg-muted overflow-hidden mb-3">
               <div
-                className="h-full rounded-full bg-linear-to-r from-[#4a0080] via-primary to-secondary transition-all duration-700"
+                className="h-full rounded-full bg-primary transition-all duration-700"
                 style={{ width: `${completeness}%` }}
               />
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-sm text-muted-foreground">
               {completeness < 100 ? 'Fill in the required fields to reach 100%' : 'Your profile is complete'}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center">
-                <FontAwesomeIcon icon={faTags} className="w-4 h-4 text-primary" />
-              </div>
-              <h3 className="text-sm font-bold text-slate-900">Skills</h3>
-            </div>
+          <div className="rounded-xl border border-border bg-card p-6">
+            <h3 className="text-sm font-medium text-muted-foreground mb-4">Skills</h3>
             {skillsList.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {skillsList.map((skill) => (
-                  <span key={skill} className="inline-flex items-center rounded-full bg-primary/8 text-primary text-xs font-semibold px-3 py-1.5 border border-primary/15">
+                  <span key={skill} className="inline-flex items-center rounded-full bg-accent text-accent-foreground text-xs font-medium px-3 py-1.5">
                     {skill}
                   </span>
                 ))}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
-                  <FontAwesomeIcon icon={faTags} className="w-5 h-5 text-slate-300" />
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-3">
+                  <FontAwesomeIcon icon={faTags} className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <p className="text-sm font-semibold text-slate-400">No skills yet</p>
-                <p className="text-xs text-slate-300 mt-1">Upload a resume or add skills manually</p>
+                <p className="text-sm font-medium text-foreground/80">No skills yet</p>
+                <p className="text-sm text-muted-foreground mt-1">Upload a resume or add skills manually</p>
               </div>
             )}
           </div>

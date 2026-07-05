@@ -59,39 +59,31 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f0e6f6] via-[#ece0f0] to-[#e8daf0] p-4 md:p-8">
-      {/* Outer decorative diagonal lines */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[-5%] w-[60%] h-[200%] border border-[#d4b8e0]/30 -rotate-[25deg]" />
-        <div className="absolute top-[-10%] left-[5%] w-[60%] h-[200%] border border-[#d4b8e0]/20 -rotate-[25deg]" />
-        <div className="absolute top-[-10%] right-[-15%] w-[60%] h-[200%] border border-[#d4b8e0]/25 -rotate-[25deg]" />
-      </div>
-
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 md:p-8">
       {/* Main Card */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="relative z-10 w-full max-w-5xl bg-white rounded-3xl shadow-[0_20px_60px_rgba(116,0,122,0.12)] flex flex-col md:flex-row overflow-hidden min-h-[560px]"
+        transition={{ duration: 0.35 }}
+        className="w-full max-w-4xl bg-card rounded-2xl shadow-lg ring-1 ring-border flex flex-col md:flex-row overflow-hidden min-h-135"
       >
-
         {/* ===== LEFT SIDE: Form ===== */}
         <div className="flex-1 flex flex-col px-8 md:px-12 py-8 md:py-10">
 
           {/* Top Navigation */}
-          <nav className="flex items-center gap-6 mb-10" aria-label="Auth navigation">
+          <nav className="flex items-center gap-6 mb-8" aria-label="Auth navigation">
             <Link to="/" className="shrink-0 mr-4">
-              <img src={logo} alt="ResumeMatch" className="h-10 w-auto" />
+              <img src={logo} alt="ResuMatrix" className="h-9 w-auto" />
             </Link>
             {NAV_ITEMS.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `text-xs md:text-sm font-bold tracking-wider transition-colors ${
+                  `text-sm font-medium tracking-wide transition-colors ${
                     isActive
-                      ? 'text-[#74007a] border-b-2 border-[#74007a] pb-0.5'
-                      : 'text-slate-500 hover:text-[#74007a]'
+                      ? 'text-primary'
+                      : 'text-muted-foreground hover:text-foreground'
                   }`
                 }
               >
@@ -101,8 +93,8 @@ export default function Register() {
           </nav>
 
           {/* Heading */}
-          <h1 className="text-4xl md:text-5xl font-bold text-[#3a0040] mb-8 italic" style={{ fontFamily: 'Georgia, serif' }}>
-            Sign up
+          <h1 className="text-3xl font-semibold text-foreground mb-7">
+            Create your account
           </h1>
 
           {/* Form */}
@@ -110,39 +102,39 @@ export default function Register() {
 
             {/* Full Name */}
             <div>
-              <label htmlFor="fullName" className="text-sm font-semibold text-slate-600 mb-1.5 block">
-                Full Name
+              <label htmlFor="fullName" className="text-sm font-medium text-foreground/80 mb-1.5 block">
+                Full name
               </label>
-              <div className="flex items-center px-4 py-3 rounded-full border border-slate-300 bg-white focus-within:border-[#74007a] focus-within:ring-1 focus-within:ring-[#74007a]/20 transition-all">
+              <div className="flex items-center px-4 h-11 rounded-xl border border-border bg-secondary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-colors">
                 <input
                   id="fullName"
                   type="text"
-                  placeholder="Daniel Gallego"
-                  className="flex-1 bg-transparent text-sm text-slate-800 placeholder-slate-400 outline-none"
+                  placeholder="Jane Doe"
+                  className="flex-1 bg-transparent text-sm text-foreground placeholder-muted-foreground outline-none"
                   {...register('fullName')}
                 />
               </div>
               {errors.fullName && (
-                <p className="text-xs text-red-500 mt-1 ml-4">{errors.fullName.message}</p>
+                <p className="text-xs text-destructive mt-1 ml-1">{errors.fullName.message}</p>
               )}
             </div>
 
             {/* Email Address */}
             <div>
-              <label htmlFor="email" className="text-sm font-semibold text-slate-600 mb-1.5 block">
-                Email Address
+              <label htmlFor="email" className="text-sm font-medium text-foreground/80 mb-1.5 block">
+                Email address
               </label>
-              <div className="flex items-center px-4 py-3 rounded-full border border-slate-200 bg-slate-50 focus-within:border-[#74007a] focus-within:ring-1 focus-within:ring-[#74007a]/20 transition-all">
+              <div className="flex items-center px-4 h-11 rounded-xl border border-border bg-secondary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-colors">
                 <input
                   id="email"
                   type="email"
-                  placeholder="hello@reallygreatsite.com"
-                  className="flex-1 bg-transparent text-sm text-slate-800 placeholder-slate-400 outline-none"
+                  placeholder="you@example.com"
+                  className="flex-1 bg-transparent text-sm text-foreground placeholder-muted-foreground outline-none"
                   {...register('email')}
                 />
               </div>
               {errors.email && (
-                <p className="text-xs text-red-500 mt-1 ml-4">{errors.email.message}</p>
+                <p className="text-xs text-destructive mt-1 ml-1">{errors.email.message}</p>
               )}
             </div>
 
@@ -150,55 +142,55 @@ export default function Register() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Password */}
               <div>
-                <label htmlFor="password" className="text-sm font-semibold text-slate-600 mb-1.5 block">
+                <label htmlFor="password" className="text-sm font-medium text-foreground/80 mb-1.5 block">
                   Password
                 </label>
-                <div className="flex items-center px-4 py-3 rounded-full border border-slate-200 bg-slate-50 focus-within:border-[#74007a] focus-within:ring-1 focus-within:ring-[#74007a]/20 transition-all">
+                <div className="flex items-center px-4 h-11 rounded-xl border border-border bg-secondary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-colors">
                   <input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
-                    className="flex-1 bg-transparent text-sm text-slate-800 placeholder-slate-400 outline-none min-w-0"
+                    className="flex-1 bg-transparent text-sm text-foreground placeholder-muted-foreground outline-none min-w-0"
                     {...register('password')}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-slate-400 hover:text-[#74007a] transition-colors ml-2 shrink-0"
+                    className="text-muted-foreground hover:text-foreground transition-colors ml-2 shrink-0"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="text-sm" />
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-xs text-red-500 mt-1 ml-4">{errors.password.message}</p>
+                  <p className="text-xs text-destructive mt-1 ml-1">{errors.password.message}</p>
                 )}
               </div>
 
               {/* Confirm Password */}
               <div>
-                <label htmlFor="confirm" className="text-sm font-semibold text-slate-600 mb-1.5 block">
-                  Confirm Password
+                <label htmlFor="confirm" className="text-sm font-medium text-foreground/80 mb-1.5 block">
+                  Confirm password
                 </label>
-                <div className="flex items-center px-4 py-3 rounded-full border border-slate-200 bg-slate-50 focus-within:border-[#74007a] focus-within:ring-1 focus-within:ring-[#74007a]/20 transition-all">
+                <div className="flex items-center px-4 h-11 rounded-xl border border-border bg-secondary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-colors">
                   <input
                     id="confirm"
                     type={showConfirm ? 'text' : 'password'}
                     placeholder="••••••••"
-                    className="flex-1 bg-transparent text-sm text-slate-800 placeholder-slate-400 outline-none min-w-0"
+                    className="flex-1 bg-transparent text-sm text-foreground placeholder-muted-foreground outline-none min-w-0"
                     {...register('confirm')}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirm(!showConfirm)}
-                    className="text-slate-400 hover:text-[#74007a] transition-colors ml-2 shrink-0"
+                    className="text-muted-foreground hover:text-foreground transition-colors ml-2 shrink-0"
                     aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
                   >
                     <FontAwesomeIcon icon={showConfirm ? faEyeSlash : faEye} className="text-sm" />
                   </button>
                 </div>
                 {errors.confirm && (
-                  <p className="text-xs text-red-500 mt-1 ml-4">{errors.confirm.message}</p>
+                  <p className="text-xs text-destructive mt-1 ml-1">{errors.confirm.message}</p>
                 )}
               </div>
             </div>
@@ -207,32 +199,32 @@ export default function Register() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 rounded-full bg-[#4a0080] hover:bg-[#5c00a0] text-white font-bold text-sm tracking-wide shadow-lg shadow-[#4a0080]/20 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-2"
+              className="w-full h-11 rounded-xl bg-primary hover:bg-primary-dark text-primary-foreground font-semibold text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-1"
             >
-              {isSubmitting ? 'Creating account...' : 'Create Account'}
+              {isSubmitting ? 'Creating account...' : 'Create account'}
             </button>
 
             {/* Google Sign Up */}
             <button
               type="button"
               onClick={handleGoogleSignup}
-              className="w-full py-3 rounded-full border-2 border-[#74007a]/40 bg-white hover:bg-[#faf5fc] text-[#74007a] font-bold text-sm tracking-wide flex items-center justify-center gap-3 transition-all duration-300 cursor-pointer"
+              className="w-full h-11 rounded-xl border border-border bg-transparent hover:bg-secondary text-foreground font-medium text-sm flex items-center justify-center gap-3 transition-colors cursor-pointer"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
-              Log in With GOOGLE
+              Continue with Google
             </button>
 
             {/* Login Link */}
-            <p className="text-sm text-slate-500">
-              or{' '}
+            <p className="text-sm text-muted-foreground text-center mt-1">
+              Already have an account?{' '}
               <Link
                 to="/login"
-                className="text-[#74007a] font-semibold underline underline-offset-4 hover:text-[#da70dc] transition-colors"
+                className="text-primary font-medium hover:underline underline-offset-4"
               >
                 Log in
               </Link>
@@ -241,15 +233,16 @@ export default function Register() {
         </div>
 
         {/* ===== RIGHT SIDE: Brand Panel ===== */}
-        <div className="hidden md:block w-[45%] lg:w-[42%] bg-gradient-to-br from-[#4a0080] via-[#74007a] to-[#da70dc] p-10 flex flex-col justify-center items-center text-center">
-          <div className="w-20 h-20 rounded-full bg-white/15 flex items-center justify-center mb-6">
-            <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <div className="hidden md:flex w-[42%] bg-navbar-bg p-10 flex-col justify-center items-start text-left">
+          <div className="w-11 h-11 rounded-lg bg-white/10 flex items-center justify-center mb-6">
+            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
             </svg>
           </div>
-          <h3 className="text-2xl font-bold text-white mb-3">AI-Powered Job Matching</h3>
-          <p className="text-white/70 text-sm leading-relaxed max-w-xs">
-            Upload your resume, get instant match scores, and track applications through an intelligent pipeline.
+          <h3 className="text-xl font-semibold text-white mb-3">Start with your resume</h3>
+          <p className="text-white/60 text-sm leading-relaxed max-w-xs">
+            Upload it once and ResuMatrix builds your profile, scores jobs against it, and
+            tracks every application from there.
           </p>
         </div>
       </motion.div>

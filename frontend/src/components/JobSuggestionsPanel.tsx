@@ -61,9 +61,9 @@ export default function JobSuggestionsPanel({ job, onScoreResolved }: JobSuggest
   }
 
   return (
-    <div className="h-67.5 flex flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <p className="text-sm font-bold text-slate-900 mb-1">Suggested Improvements</p>
-      <p className="text-xs text-slate-400 mb-3 truncate" title={`${job.job_title} at ${job.employer_name}`}>
+    <div className="h-67.5 flex flex-col rounded-xl border border-border bg-card p-4">
+      <p className="text-sm font-semibold text-foreground mb-1">Suggested improvements</p>
+      <p className="text-xs text-muted-foreground mb-3 truncate" title={`${job.job_title} at ${job.employer_name}`}>
         for &ldquo;{job.job_title}&rdquo; at {job.employer_name}
       </p>
 
@@ -81,13 +81,13 @@ export default function JobSuggestionsPanel({ job, onScoreResolved }: JobSuggest
             </span>
             {optimization.score_after > optimization.score_before && (
               <>
-                <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3 text-slate-400" />
+                <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3 text-muted-foreground" />
                 <span className={`text-lg font-bold ${getMatchColor(optimization.score_after)}`}>
                   {optimization.score_after}/10
                 </span>
               </>
             )}
-            <span className="text-[11px] text-slate-400 ml-0.5">
+            <span className="text-[11px] text-muted-foreground ml-0.5">
               {optimization.score_after > optimization.score_before ? 'if you apply suggestions' : 'match score'}
             </span>
           </div>
@@ -95,19 +95,19 @@ export default function JobSuggestionsPanel({ job, onScoreResolved }: JobSuggest
           {optimization.changes.length > 0 ? (
             <div className="space-y-2 flex-1 min-h-0 overflow-y-auto pr-1 mb-3">
               {optimization.changes.map((c, i) => (
-                <div key={i} className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-600">
+                <div key={i} className="rounded-lg border border-border bg-muted/50 p-2.5 text-xs text-foreground/70">
                   {changeMessage(c)}
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-xs text-slate-400 mb-3 flex-1">No suggestions — this resume already covers the job well.</p>
+            <p className="text-xs text-muted-foreground mb-3 flex-1">No suggestions — this resume already covers the job well.</p>
           )}
 
           <button
             onClick={handleDownload}
             disabled={isDownloading}
-            className="w-full mt-auto shrink-0 inline-flex items-center justify-center gap-2 h-9 px-5 rounded-full bg-linear-to-r from-[#4a0080] via-primary to-secondary hover:from-secondary hover:via-primary hover:to-[#4a0080] text-white text-xs font-bold tracking-wide shadow-sm transition-all duration-300 disabled:opacity-60 cursor-pointer"
+            className="w-full mt-auto shrink-0 inline-flex items-center justify-center gap-2 h-9 px-5 rounded-lg bg-primary hover:bg-primary-dark text-primary-foreground text-xs font-semibold transition-colors disabled:opacity-60 cursor-pointer"
           >
             <FontAwesomeIcon
               icon={isDownloading ? faSpinner : faWandMagicSparkles}
@@ -117,7 +117,7 @@ export default function JobSuggestionsPanel({ job, onScoreResolved }: JobSuggest
           </button>
         </>
       ) : (
-        <p className="text-xs text-slate-400">Could not load suggestions.</p>
+        <p className="text-xs text-muted-foreground">Could not load suggestions.</p>
       )}
     </div>
   )

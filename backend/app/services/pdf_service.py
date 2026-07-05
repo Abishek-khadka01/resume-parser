@@ -1,5 +1,4 @@
 import io
-from xml.sax.saxutils import escape
 
 from reportlab.lib.pagesizes import LETTER
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -10,7 +9,6 @@ _styles = getSampleStyleSheet()
 _HEADING = ParagraphStyle("SectionHeading", parent=_styles["Heading2"], spaceBefore=12, spaceAfter=4)
 _NAME = ParagraphStyle("Name", parent=_styles["Title"], alignment=0)
 _BODY = _styles["Normal"]
-_SMALL_NOTE = ParagraphStyle("SmallNote", parent=_styles["Normal"], fontSize=8, textColor="#888888", spaceAfter=6)
 
 
 def build_optimized_resume_pdf(profile, optimization: dict) -> bytes:
@@ -57,21 +55,6 @@ def build_optimized_resume_pdf(profile, optimization: dict) -> bytes:
                 b for b in (edu.degree, edu.field, edu.institution, str(edu.graduation_year or "")) if b
             )
             story.append(Paragraph(line, _BODY))
-
-    # The sections above are built from structured fields the parser extracted
-    # (name/contact/skills/experience/education) — sections it doesn't model,
-    # like Projects or Certifications, would otherwise be silently dropped.
-    # Appending the full original text guarantees nothing from the uploaded
-    # resume is ever lost, even though it duplicates what's shown above.
-    if profile.resume_raw_text:
-        story.append(Paragraph("Original Resume (Full Text)", _HEADING))
-        story.append(Paragraph(
-            "Included in full below so no content from your uploaded resume is lost, "
-            "even where it isn't reflected in the structured sections above.",
-            _SMALL_NOTE,
-        ))
-        raw_html = escape(profile.resume_raw_text).replace("\n", "<br/>")
-        story.append(Paragraph(raw_html, _BODY))
 
     doc.build(story)
     return buffer.getvalue()

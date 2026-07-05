@@ -1,19 +1,48 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #74007a;
-  --color-primary-dark: #4f0054;
-  --color-primary-darker: #36003a;
-  --color-secondary: #da70dc;
-  --color-secondary-light: #f3d4f5;
-  --color-navbar-bg: #3c0040;
+  /* Brand: a single deliberate accent (deep plum), not a rainbow gradient. */
+  --color-primary: #5b1660;
+  --color-primary-foreground: #fefcfe;
+  --color-primary-dark: #451149;
+  --color-primary-darker: #300b33;
+
+  /* Sparingly used warm accent — small highlights only, never gradients. */
+  --color-brand-rose: #a8577d;
+
+  --color-background: #faf9f7;
+  --color-foreground: #211a27;
+
+  --color-card: #ffffff;
+  --color-card-foreground: #211a27;
+
+  --color-popover: #ffffff;
+  --color-popover-foreground: #211a27;
+
+  --color-secondary: #f1eef1;
+  --color-secondary-foreground: #211a27;
+
+  --color-muted: #f2f0f1;
+  --color-muted-foreground: #726c78;
+
+  --color-accent: #f4eef6;
+  --color-accent-foreground: #45114a;
+
+  --color-destructive: #ab2a22;
+  --color-destructive-foreground: #fefcfe;
+
+  --color-border: #e7e2e7;
+  --color-input: #e7e2e7;
+  --color-ring: #5b1660;
+
+  --color-navbar-bg: #211228;
 }
 
-/* Custom CSS utilities for navbar diagonal slashes and animations */
-.skew-slash {
-  transform: skewX(-25deg);
+html {
+  scroll-behavior: smooth;
 }
 
-.skew-slash-reverse {
-  transform: skewX(25deg);
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }

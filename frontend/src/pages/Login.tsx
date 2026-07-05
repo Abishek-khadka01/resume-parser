@@ -63,40 +63,33 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f0e6f6] via-[#ece0f0] to-[#e8daf0] p-4 md:p-8">
-      {/* Outer decorative diagonal lines (matching design background) */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[-5%] w-[60%] h-[200%] border border-[#d4b8e0]/30 -rotate-[25deg]" />
-        <div className="absolute top-[-10%] left-[5%] w-[60%] h-[200%] border border-[#d4b8e0]/20 -rotate-[25deg]" />
-        <div className="absolute top-[-10%] right-[-15%] w-[60%] h-[200%] border border-[#d4b8e0]/25 -rotate-[25deg]" />
-      </div>
-
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 md:p-8">
       {/* Main Card */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="relative z-10 w-full max-w-5xl bg-white rounded-3xl shadow-[0_20px_60px_rgba(116,0,122,0.12)] flex flex-col md:flex-row overflow-hidden min-h-[560px]"
+        transition={{ duration: 0.35 }}
+        className="w-full max-w-4xl bg-card rounded-2xl shadow-lg ring-1 ring-border flex flex-col md:flex-row overflow-hidden min-h-135"
       >
         {/* ===== LEFT SIDE: Form ===== */}
         <div className="flex-1 flex flex-col px-8 md:px-12 py-8 md:py-10">
           {/* Top Navigation */}
           <nav
-            className="flex items-center gap-6 mb-10"
+            className="flex items-center gap-6 mb-12"
             aria-label="Auth navigation"
           >
             <Link to="/" className="shrink-0 mr-4">
-              <img src={logo} alt="ResumeMatch" className="h-10 w-auto" />
+              <img src={logo} alt="ResuMatrix" className="h-9 w-auto" />
             </Link>
             {NAV_ITEMS.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `text-xs md:text-sm font-bold tracking-wider transition-colors ${
+                  `text-sm font-medium tracking-wide transition-colors ${
                     isActive
-                      ? "text-[#74007a] border-b-2 border-[#74007a] pb-0.5"
-                      : "text-slate-500 hover:text-[#74007a]"
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground"
                   }`
                 }
               >
@@ -106,35 +99,32 @@ export default function Login() {
           </nav>
 
           {/* Heading */}
-          <h1
-            className="text-4xl md:text-5xl font-bold text-[#3a0040] mb-10 italic"
-            style={{ fontFamily: "Georgia, serif" }}
-          >
-            Log in
+          <h1 className="text-3xl font-semibold text-foreground mb-8">
+            Log in to your account
           </h1>
 
           {/* Form */}
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="flex flex-col gap-5 max-w-md"
+            className="flex flex-col gap-4 max-w-md"
           >
             {/* Username / Email */}
             <div>
-              <div className="flex items-center gap-3 px-4 py-3 rounded-full border border-slate-300 bg-white focus-within:border-[#74007a] focus-within:ring-1 focus-within:ring-[#74007a]/20 transition-all">
+              <div className="flex items-center gap-3 px-4 h-11 rounded-xl border border-border bg-secondary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-colors">
                 <FontAwesomeIcon
                   icon={faUser}
-                  className="text-slate-400 text-sm"
+                  className="text-muted-foreground text-sm"
                 />
                 <input
                   type="email"
-                  placeholder="email"
-                  className="flex-1 bg-transparent text-sm text-slate-800 placeholder-slate-400 outline-none"
+                  placeholder="Email address"
+                  className="flex-1 bg-transparent text-sm text-foreground placeholder-muted-foreground outline-none"
                   aria-label="Email address"
                   {...register("email")}
                 />
               </div>
               {errors.email && (
-                <p className="text-xs text-red-500 mt-1 ml-4">
+                <p className="text-xs text-destructive mt-1 ml-1">
                   {errors.email.message}
                 </p>
               )}
@@ -142,22 +132,22 @@ export default function Login() {
 
             {/* Password */}
             <div>
-              <div className="flex items-center gap-3 px-4 py-3 rounded-full border border-slate-200 bg-slate-50 focus-within:border-[#74007a] focus-within:ring-1 focus-within:ring-[#74007a]/20 transition-all">
+              <div className="flex items-center gap-3 px-4 h-11 rounded-xl border border-border bg-secondary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-colors">
                 <FontAwesomeIcon
                   icon={faLock}
-                  className="text-slate-400 text-sm"
+                  className="text-muted-foreground text-sm"
                 />
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
-                  className="flex-1 bg-transparent text-sm text-slate-800 placeholder-slate-400 outline-none"
+                  className="flex-1 bg-transparent text-sm text-foreground placeholder-muted-foreground outline-none"
                   aria-label="Password"
                   {...register("password")}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-slate-400 hover:text-[#74007a] transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   <FontAwesomeIcon
@@ -167,37 +157,37 @@ export default function Login() {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-xs text-red-500 mt-1 ml-4">
+                <p className="text-xs text-destructive mt-1 ml-1">
                   {errors.password.message}
                 </p>
               )}
             </div>
 
             {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between text-xs md:text-sm">
-              <label className="flex items-center gap-2 cursor-pointer select-none text-slate-500">
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center gap-2 cursor-pointer select-none text-muted-foreground">
                 <button
                   type="button"
                   onClick={() => setRememberMe(!rememberMe)}
-                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
+                  className={`w-4 h-4 rounded-sm border flex items-center justify-center transition-colors ${
                     rememberMe
-                      ? "border-[#74007a] bg-[#74007a]"
-                      : "border-slate-400"
+                      ? "border-primary bg-primary"
+                      : "border-input"
                   }`}
                   aria-pressed={rememberMe}
                   aria-label="Remember me"
                 >
                   {rememberMe && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                    <span className="w-1.5 h-1.5 rounded-xs bg-white" />
                   )}
                 </button>
-                Remember Me
+                Remember me
               </label>
               <Link
                 to="/forgot-password"
-                className="text-slate-500 hover:text-[#74007a] transition-colors"
+                className="text-muted-foreground hover:text-primary transition-colors"
               >
-                Forgot Password?
+                Forgot password?
               </Link>
             </div>
 
@@ -205,7 +195,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 rounded-full bg-[#4a0080] hover:bg-[#5c00a0] text-white font-bold text-sm tracking-wide shadow-lg shadow-[#4a0080]/20 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full h-11 rounded-xl bg-primary hover:bg-primary-dark text-primary-foreground font-semibold text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-1"
             >
               {isSubmitting ? "Logging in..." : "Log in"}
             </button>
@@ -214,9 +204,9 @@ export default function Login() {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full py-3 rounded-full border-2 border-[#74007a]/40 bg-white hover:bg-[#faf5fc] text-[#74007a] font-bold text-sm tracking-wide flex items-center justify-center gap-3 transition-all duration-300 cursor-pointer"
+              className="w-full h-11 rounded-xl border border-border bg-transparent hover:bg-secondary text-foreground font-medium text-sm flex items-center justify-center gap-3 transition-colors cursor-pointer"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
@@ -234,15 +224,15 @@ export default function Login() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Log in With google
+              Continue with Google
             </button>
 
             {/* Sign Up Link */}
-            <p className="text-sm text-slate-500">
-              or{" "}
+            <p className="text-sm text-muted-foreground text-center mt-1">
+              Don&rsquo;t have an account?{" "}
               <Link
                 to="/register"
-                className="text-[#74007a] font-semibold underline underline-offset-4 hover:text-[#da70dc] transition-colors"
+                className="text-primary font-medium hover:underline underline-offset-4"
               >
                 Sign up
               </Link>
@@ -251,10 +241,10 @@ export default function Login() {
         </div>
 
         {/* ===== RIGHT SIDE: Brand Panel ===== */}
-        <div className="hidden md:block w-[45%] lg:w-[42%] bg-gradient-to-br from-[#4a0080] via-[#74007a] to-[#da70dc] p-10 flex flex-col justify-center items-center text-center">
-          <div className="w-20 h-20 rounded-full bg-white/15 flex items-center justify-center mb-6">
+        <div className="hidden md:flex w-[42%] bg-navbar-bg p-10 flex-col justify-center items-start text-left">
+          <div className="w-11 h-11 rounded-lg bg-white/10 flex items-center justify-center mb-6">
             <svg
-              className="w-10 h-10 text-white"
+              className="w-5 h-5 text-white"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -267,12 +257,12 @@ export default function Login() {
               />
             </svg>
           </div>
-          <h3 className="text-2xl font-bold text-white mb-3">
-            AI-Powered Job Matching
+          <h3 className="text-xl font-semibold text-white mb-3">
+            Built around your actual resume
           </h3>
-          <p className="text-white/70 text-sm leading-relaxed max-w-xs">
-            Upload your resume, get instant match scores, and track applications
-            through an intelligent pipeline.
+          <p className="text-white/60 text-sm leading-relaxed max-w-xs">
+            Every match score and suggestion comes from the skills and experience you
+            already have — not a generic keyword checklist.
           </p>
         </div>
       </motion.div>
