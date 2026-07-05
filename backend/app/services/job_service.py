@@ -32,7 +32,7 @@ async def search_jobs(
     query: str | None = None,
     location: str | None = None,
     *,
-    date_posted: str = "all",
+    date_posted: str = "month",
     remote_jobs_only: bool | None = None,
     employment_types: str | None = None,
     job_requirements: str | None = None,
@@ -56,7 +56,10 @@ async def search_jobs(
     if cache_key in _cache:
         jobs, next_cursor, ts = _cache[cache_key]
         if time() - ts < CACHE_TTL:
-            return jobs, next_cursor
+            # Return a shallow copy — callers (ats_service) score/sort jobs in
+            # place per-profile, and the cache must stay a pristine, shared
+            # snapshot across different users/requests.
+            return [dict(job) for job in jobs], next_cursor
 
     async with httpx.AsyncClient(timeout=30) as client:
         last_exc: httpx.HTTPError | None = None

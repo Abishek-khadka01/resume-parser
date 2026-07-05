@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { User, Profile, Job, Application, ApplicationStatus, JobAlert, JobSearchResponse, AtsAnalysis, ResumeOptimization } from '@/types'
+import type { User, Profile, Job, Application, ApplicationStatus, JobAlert, JobSearchResponse, AtsAnalysis, ResumeOptimization, AppNotification } from '@/types'
 
 const client = axios.create({
   baseURL: '/api',
@@ -115,6 +115,29 @@ export async function createAlert(data: {
 export async function toggleAlert(alertId: string, isActive: boolean) {
   const res = await client.patch(`/alerts/${alertId}`, { is_active: isActive })
   return res.data as JobAlert
+}
+
+export async function deleteAlert(alertId: string) {
+  await client.delete(`/alerts/${alertId}`)
+}
+
+export async function getNotifications() {
+  const res = await client.get('/notifications')
+  return res.data as AppNotification[]
+}
+
+export async function getUnreadNotificationCount() {
+  const res = await client.get('/notifications/unread-count')
+  return res.data as { count: number }
+}
+
+export async function markNotificationRead(notificationId: string) {
+  const res = await client.patch(`/notifications/${notificationId}/read`)
+  return res.data as AppNotification
+}
+
+export async function markAllNotificationsRead() {
+  await client.post('/notifications/read-all')
 }
 
 export async function googleLogin() {

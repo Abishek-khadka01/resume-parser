@@ -158,3 +158,15 @@ export interface AuthTokens {
   access_token: string;
   token_type: string;
 }
+
+export interface AppNotification {
+  id: string;
+  alert_id?: string;
+  job_id?: string;
+  title: string;
+  message: string;
+  job_data?: Job;
+  match_score?: number;
+  is_read: boolean;
+  created_at: string;
+}

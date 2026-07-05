@@ -11,6 +11,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import logo from '../../assets/logo-white.png'
 import { useAuthStore } from '@/stores/authStore'
+import { NotificationBell } from './NotificationBell'
 
 export interface NavbarProps {
   onSearch?: (query: string) => void
@@ -20,6 +21,7 @@ const navItems = [
   { to: '/', label: 'Home', protected: false },
   { to: '/dashboard', label: 'Dashboard', protected: true },
   { to: '/job-board', label: 'Job Board', protected: true },
+  { to: '/alerts', label: 'Alerts', protected: true },
   { to: '/profile-setup', label: 'Profile', protected: true },
 ]
 
@@ -137,6 +139,8 @@ export function Navbar({ onSearch }: NavbarProps) {
               <FontAwesomeIcon icon={faSearch} className="w-3.5 h-3.5" />
             </button>
           </form>
+
+          {isLoggedIn && <NotificationBell />}
 
           {isLoggedIn ? (
             <div className="relative" ref={dropdownRef}>

@@ -122,12 +122,15 @@ async def score_jobs_batch(jobs: list[dict], profile) -> list[dict]:
     text_scores = _text_similarity_batch(resume_text, job_texts)
     semantic_scores = await _semantic_similarity_batch(resume_text, job_texts)
 
+    scored_jobs = []
     for job, text_score, semantic_score in zip(jobs, text_scores, semantic_scores):
         skill_score, _, _ = _skill_overlap(job, profile_skills_lower)
-        job["match_score"] = _blend(skill_score, text_score, semantic_score)
+        scored_job = dict(job)
+        scored_job["match_score"] = _blend(skill_score, text_score, semantic_score)
+        scored_jobs.append(scored_job)
 
-    jobs.sort(key=lambda j: j.get("match_score", 0), reverse=True)
-    return jobs
+    scored_jobs.sort(key=lambda j: j["match_score"], reverse=True)
+    return scored_jobs
 
 
 async def analyze_job(job: dict, profile) -> dict:

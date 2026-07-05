@@ -9,6 +9,7 @@ import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import JobBoard from "@/pages/JobBoard";
 import ProfileSetup from "@/pages/ProfileSetup";
+import Alerts from "@/pages/Alerts";
 import RedirectGoogle from "@/pages/RedirectGoogle";
 
 const queryClient = new QueryClient({
@@ -46,6 +47,7 @@ export default function App() {
           >
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/job-board" element={<JobBoard />} />
+            <Route path="/alerts" element={<Alerts />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
           </Route>
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

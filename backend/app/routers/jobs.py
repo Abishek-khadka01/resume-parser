@@ -50,7 +50,7 @@ def _matches_experience_level(job: dict, levels: list[str]) -> bool:
 async def get_jobs(
     q: str = Query(default=""),
     location: str | None = Query(default=None),
-    date_posted: str = Query(default="all"),
+    date_posted: str = Query(default="month"),
     remote_only: bool = Query(default=False),
     employment_types: str | None = Query(default=None),
     experience_level: str | None = Query(default=None),
@@ -108,7 +108,7 @@ async def get_jobs(
     if levels:
         jobs = [job for job in jobs if _matches_experience_level(job, levels)]
 
-    if profile and profile.skills:
+    if profile:
         jobs = await ats_service.score_jobs_batch(jobs, profile)
 
     return {"jobs": jobs, "cursor": next_cursor}

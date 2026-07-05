@@ -1,5 +1,5 @@
 import { useState, useCallback, Fragment } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -46,16 +46,27 @@ export default function JobBoard() {
   const effectiveExperienceLevel = userSetExperienceLevel ? experienceLevel : autoExperienceLevel
   const filtersVisible = showFilters || (!userSetExperienceLevel && autoExperienceLevel === 'entry')
 
-  const { data, isLoading, isError, refetch, isFetching } = useQuery({
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    isFetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['jobs', submittedSearch, effectiveExperienceLevel],
-    queryFn: () => getJobs({
+    queryFn: ({ pageParam }) => getJobs({
       ...(submittedSearch ? { q: submittedSearch } : {}),
       ...(effectiveExperienceLevel ? { experience_level: effectiveExperienceLevel } : {}),
+      ...(pageParam ? { cursor: pageParam } : {}),
     }),
-    enabled: true,
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.cursor || undefined,
     retry: 1,
   })
-  const jobs = data?.jobs
+  const jobs = data?.pages.flatMap((page) => page.jobs)
 
   const saveMutation = useMutation({
     mutationFn: (job: Job) =>
@@ -252,6 +263,22 @@ export default function JobBoard() {
                 </Fragment>
               )
             })}
+            {hasNextPage && (
+              <div className="xl:col-span-2 flex justify-center py-2">
+                <button
+                  type="button"
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  className="inline-flex items-center gap-2 h-10 px-6 rounded-lg border border-border text-sm font-semibold text-foreground/80 hover:border-primary/30 hover:text-primary transition-colors disabled:opacity-60 cursor-pointer"
+                >
+                  <FontAwesomeIcon
+                    icon={faRotateRight}
+                    className={isFetchingNextPage ? 'w-3.5 h-3.5 animate-spin' : 'w-3.5 h-3.5'}
+                  />
+                  {isFetchingNextPage ? 'Loading more jobs...' : 'Load more jobs'}
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>

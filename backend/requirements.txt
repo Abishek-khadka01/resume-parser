@@ -85,3 +85,6 @@ uvicorn==0.48.0
 uvloop==0.22.1
 watchfiles==1.2.0
 websockets==16.0
+APScheduler==3.11.3
+tzdata==2026.2
+tzlocal==5.4.4
