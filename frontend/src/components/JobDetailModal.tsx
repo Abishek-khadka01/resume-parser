@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExternalLinkAlt, faWandMagicSparkles, faArrowRight, faSpinner } from '@fortawesome/free-solid-svg-icons'
@@ -12,7 +12,8 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getAtsAnalysis, getResumeOptimization, downloadOptimizedResume } from '@/services/api'
+import { getAtsAnalysis, getResumeOptimization, downloadOptimizedResume, trackApplyClick } from '@/services/api'
+import { useApplyTrackingStore } from '@/stores/applyTrackingStore'
 import { getMatchColor, categoryLabel } from '@/lib/utils'
 import type { Job } from '@/types'
 
@@ -25,6 +26,32 @@ interface JobDetailModalProps {
 export default function JobDetailModal({ job, open, onOpenChange }: JobDetailModalProps) {
   const [activeTab, setActiveTab] = useState('overview')
   const [isDownloadingOptimized, setIsDownloadingOptimized] = useState(false)
+  const queryClient = useQueryClient()
+  const setPendingApply = useApplyTrackingStore((s) => s.setPending)
+
+  const trackClickMutation = useMutation({
+    mutationFn: trackApplyClick,
+    onSuccess: (application) => {
+      queryClient.invalidateQueries({ queryKey: ['applications'] })
+      setPendingApply({
+        applicationId: application.id,
+        jobTitle: application.job_title,
+        companyName: application.company_name,
+      })
+    },
+  })
+
+  const handleApplyClick = () => {
+    if (!job) return
+    trackClickMutation.mutate({
+      job_id: job.job_id,
+      job_title: job.job_title,
+      company_name: job.employer_name,
+      company_logo_url: job.employer_logo,
+      match_score: job.match_score,
+      job_data: job as unknown as Record<string, unknown>,
+    })
+  }
 
   const { data: analysis, isLoading } = useQuery({
     queryKey: ['ats-analysis', job?.job_id],
@@ -87,6 +114,7 @@ export default function JobDetailModal({ job, open, onOpenChange }: JobDetailMod
               href={job.job_apply_link}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={handleApplyClick}
               className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
             >
               <FontAwesomeIcon icon={faExternalLinkAlt} className="w-3 h-3" />

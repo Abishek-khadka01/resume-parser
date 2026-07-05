@@ -7,6 +7,7 @@ import {
   faChevronDown,
   faTrashAlt,
   faBookmark,
+  faArrowUpRightFromSquare,
   faPaperPlane,
   faUserTie,
   faFileContract,
@@ -19,6 +20,7 @@ import type { ApplicationStatus } from '@/types'
 
 const STATUS_OPTIONS: { value: ApplicationStatus; label: string; icon: typeof faBookmark }[] = [
   { value: 'saved', label: 'Saved', icon: faBookmark },
+  { value: 'clicked', label: 'Clicked apply', icon: faArrowUpRightFromSquare },
   { value: 'applied', label: 'Applied', icon: faPaperPlane },
   { value: 'interview', label: 'Interview', icon: faUserTie },
   { value: 'offer', label: 'Offer', icon: faFileContract },
@@ -27,6 +29,7 @@ const STATUS_OPTIONS: { value: ApplicationStatus; label: string; icon: typeof fa
 
 const COLORS: Record<ApplicationStatus, string> = {
   saved: 'text-slate-600 bg-slate-100',
+  clicked: 'text-violet-700 bg-violet-50',
   applied: 'text-sky-700 bg-sky-50',
   interview: 'text-amber-700 bg-amber-50',
   offer: 'text-emerald-700 bg-emerald-50',
@@ -50,11 +53,13 @@ export default function Dashboard() {
   const isLoading = profileLoading || appsLoading
 
   const savedCount = applications?.filter((a) => a.status === 'saved').length ?? 0
+  const clickedCount = applications?.filter((a) => a.status === 'clicked').length ?? 0
   const appliedCount = applications?.filter((a) => a.status === 'applied').length ?? 0
   const interviewCount = applications?.filter((a) => a.status === 'interview').length ?? 0
 
   const stats = [
     { label: 'Saved', value: String(savedCount) },
+    { label: 'Clicked apply', value: String(clickedCount) },
     { label: 'Applied', value: String(appliedCount) },
     { label: 'Interviews', value: String(interviewCount) },
   ]
@@ -105,7 +110,7 @@ export default function Dashboard() {
         )}
       </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {stats.map(({ label, value }, i) => (
           <motion.div
             key={label}
@@ -141,7 +146,7 @@ export default function Dashboard() {
               <FontAwesomeIcon icon={faBriefcase} className="w-5 h-5 text-muted-foreground" />
             </div>
             <p className="text-sm font-medium text-foreground/80">No applications yet</p>
-            <p className="text-sm text-muted-foreground mt-1">Save jobs from the Job Board to start tracking</p>
+            <p className="text-sm text-muted-foreground mt-1">Save a job or click Apply from the Job Board to start tracking</p>
           </motion.div>
         )}
 

@@ -43,16 +43,23 @@ async def upload_resume(
 
     profile.resume_raw_text = text
 
-    for field in ("full_name", "phone", "linkedin_url", "github_url", "location", "summary", "skills"):
+    previously_locked = set(profile.resume_locked_fields or [])
+    still_locked = set()
+    for field in LOCKABLE_FIELDS:
         val = parsed.get(field)
         if val:
             setattr(profile, field, val)
+            still_locked.add(field)
+        elif field in previously_locked:
+            # This field's current value came from a previous resume upload, and
+            # the new resume doesn't mention it — clear the stale value instead of
+            # leaving the old resume's data in place, and unlock it so the user
+            # can fill it in manually if they want.
+            setattr(profile, field, [] if field == "skills" else None)
 
-    if parsed.get("skills"):
-        profile.skills_categorized = skill_service.categorize_skills(parsed["skills"])
+    profile.skills_categorized = skill_service.categorize_skills(profile.skills) if profile.skills else None
 
-    newly_locked = {f for f in LOCKABLE_FIELDS if parsed.get(f)}
-    profile.resume_locked_fields = sorted(set(profile.resume_locked_fields or []) | newly_locked)
+    profile.resume_locked_fields = sorted(still_locked)
     profile.resume_uploaded = True
 
     # desired_title has no manual UI field anymore — derive it from the most

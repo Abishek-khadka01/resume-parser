@@ -30,6 +30,7 @@ class ApplicationOut(BaseModel):
     match_score: Optional[int] = None
     status: str
     notes: Optional[str] = None
+    clicked_at: Optional[datetime] = None
     applied_at: Optional[datetime] = None
     status_updated_at: datetime
     created_at: datetime

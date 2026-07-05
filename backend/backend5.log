@@ -1,0 +1,73 @@
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|##########| 103/103 [00:00<00:00, 4437.73it/s]
+INFO:     Started server process [19096]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:64205 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52635 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49938 - "POST /api/applications/track-click HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53980 - "POST /api/applications/track-click HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53981 - "PATCH /api/applications/2d9d3779-eabd-4141-86b8-d5681f27f8e1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53982 - "POST /api/applications/track-click HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53983 - "GET /api/applications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63559 - "DELETE /api/applications/2d9d3779-eabd-4141-86b8-d5681f27f8e1 HTTP/1.1" 204 No Content
+INFO:     127.0.0.1:54842 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62456 - "GET /api/alerts HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56056 - "POST /api/alerts HTTP/1.1" 201 Created
+INFO:     127.0.0.1:57109 - "GET /api/alerts HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50362 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52391 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58058 - "GET /api/profile HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51638 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61940 - "GET /api/jobs/search HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50109 - "POST /api/jobs/optimize-resume HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50111 - "POST /api/jobs/optimize-resume HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55983 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51003 - "POST /api/applications/track-click HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60426 - "GET /api/applications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63131 - "PATCH /api/applications/59aa1550-d57f-4822-8acd-6a5e796af0ca HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49378 - "GET /api/applications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58732 - "PATCH /api/applications/59aa1550-d57f-4822-8acd-6a5e796af0ca HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61327 - "GET /api/applications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61588 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51625 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64389 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64240 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65152 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59801 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59803 - "GET /api/profile HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59804 - "GET /api/applications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59807 - "GET /api/jobs/search HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59809 - "POST /api/jobs/optimize-resume HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59811 - "POST /api/jobs/optimize-resume HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57070 - "POST /api/applications/track-click HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55647 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55059 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50072 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56942 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63936 - "GET /api/alerts HTTP/1.1" 200 OK
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|##########| 199/199 [00:00<00:00, 2113.37it/s]
+[transformers] [1mBertForTokenClassification LOAD REPORT[0m from: dslim/bert-base-NER
+Key                      | Status     |  | 
+-------------------------+------------+--+-
+bert.pooler.dense.weight | UNEXPECTED |  | 
+bert.pooler.dense.bias   | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+INFO:     127.0.0.1:56061 - "POST /api/resume/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63415 - "GET /api/profile HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61296 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54192 - "POST /api/resume/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52336 - "GET /api/profile HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60905 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63734 - "GET /api/jobs/search?experience_level=entry HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59230 - "POST /api/jobs/optimize-resume HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59231 - "POST /api/jobs/optimize-resume HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59365 - "POST /api/resume/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64692 - "GET /api/profile HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53903 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57782 - "GET /api/notifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56501 - "POST /api/resume/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51364 - "GET /api/profile HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59950 - "GET /api/notifications HTTP/1.1" 200 OK

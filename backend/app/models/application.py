@@ -17,11 +17,12 @@ class Application(Base):
     company_logo_url = Column(String, nullable=True)
     match_score = Column(Integer, nullable=True)
     status = Column(
-        SAEnum("saved", "applied", "interview", "offer", "rejected", name="app_status_enum"),
+        SAEnum("saved", "clicked", "applied", "interview", "offer", "rejected", name="app_status_enum"),
         default="saved",
         nullable=False,
     )
     notes = Column(Text, nullable=True)
+    clicked_at = Column(DateTime(timezone=True), nullable=True)
     applied_at = Column(DateTime(timezone=True), nullable=True)
     status_updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

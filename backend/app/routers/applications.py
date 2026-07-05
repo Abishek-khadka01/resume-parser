@@ -26,6 +26,38 @@ def create_application(body: ApplicationCreate, current_user: User = Depends(get
     return app
 
 
+@router.post("/track-click", response_model=ApplicationOut)
+def track_apply_click(
+    body: ApplicationCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Record that the user was redirected to a job's apply link.
+
+    We can't know whether they actually completed an application on the
+    external site, so this only marks the job as "clicked" (pending the
+    user's own confirmation) rather than "applied".
+    """
+    now = datetime.now(timezone.utc)
+    app = (
+        db.query(Application)
+        .filter(Application.user_id == current_user.id, Application.job_id == body.job_id)
+        .first()
+    )
+    if not app:
+        data = body.model_dump()
+        data["status"] = "clicked"
+        app = Application(user_id=current_user.id, clicked_at=now, **data)
+        db.add(app)
+    else:
+        app.clicked_at = now
+        if app.status == "saved":
+            app.status = "clicked"
+    db.commit()
+    db.refresh(app)
+    return app
+
+
 @router.patch("/{app_id}", response_model=ApplicationOut)
 def update_application(
     app_id: uuid.UUID,

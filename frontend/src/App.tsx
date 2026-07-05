@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
+import { ApplyConfirmDialog } from "@/components/ApplyConfirmDialog";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Navbar } from "@/components/layout/Navbar";
 import Landing from "@/pages/Landing";
@@ -54,6 +55,7 @@ export default function App() {
         </Routes>
       </BrowserRouter>
       <Toaster position="top-right" richColors />
+      <ApplyConfirmDialog />
     </QueryClientProvider>
   );
 }

@@ -121,6 +121,7 @@ export interface ResumeOptimization {
 
 export type ApplicationStatus =
   | "saved"
+  | "clicked"
   | "applied"
   | "interview"
   | "offer"
@@ -136,6 +137,7 @@ export interface Application {
   match_score?: number;
   status: ApplicationStatus;
   notes?: string;
+  clicked_at?: string;
   applied_at?: string;
   status_updated_at: string;
   created_at: string;

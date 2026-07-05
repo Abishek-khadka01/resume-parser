@@ -88,6 +88,18 @@ export async function createApplication(data: {
   return res.data as Application
 }
 
+export async function trackApplyClick(data: {
+  job_id: string
+  job_title: string
+  company_name: string
+  company_logo_url?: string
+  match_score?: number
+  job_data?: Record<string, unknown>
+}) {
+  const res = await client.post('/applications/track-click', data)
+  return res.data as Application
+}
+
 export async function updateApplicationStatus(appId: string, status: ApplicationStatus) {
   const res = await client.patch(`/applications/${appId}`, { status })
   return res.data as Application

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faBuilding,
@@ -11,6 +12,8 @@ import {
   faExternalLinkAlt,
 } from '@fortawesome/free-solid-svg-icons'
 import { cn, getMatchColor } from '@/lib/utils'
+import { trackApplyClick } from '@/services/api'
+import { useApplyTrackingStore } from '@/stores/applyTrackingStore'
 import type { Job } from '@/types'
 
 interface JobCardProps {
@@ -22,6 +25,32 @@ interface JobCardProps {
 }
 
 export default function JobCard({ job, onSave, onViewDetails, saved, index = 0 }: JobCardProps) {
+  const queryClient = useQueryClient()
+  const setPendingApply = useApplyTrackingStore((s) => s.setPending)
+
+  const trackClickMutation = useMutation({
+    mutationFn: trackApplyClick,
+    onSuccess: (application) => {
+      queryClient.invalidateQueries({ queryKey: ['applications'] })
+      setPendingApply({
+        applicationId: application.id,
+        jobTitle: application.job_title,
+        companyName: application.company_name,
+      })
+    },
+  })
+
+  const handleApplyClick = () => {
+    trackClickMutation.mutate({
+      job_id: job.job_id,
+      job_title: job.job_title,
+      company_name: job.employer_name,
+      company_logo_url: job.employer_logo,
+      match_score: job.match_score,
+      job_data: job as unknown as Record<string, unknown>,
+    })
+  }
+
   const formatSalary = (min?: number, max?: number, currency?: string) => {
     if (min == null && max == null) return null
     const fmt = (n: number) =>
@@ -141,6 +170,7 @@ export default function JobCard({ job, onSave, onViewDetails, saved, index = 0 }
           href={job.job_apply_link}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleApplyClick}
           className="inline-flex items-center gap-2 h-8 px-4 rounded-lg bg-primary hover:bg-primary-dark text-primary-foreground text-xs font-semibold transition-colors"
         >
           <FontAwesomeIcon icon={faExternalLinkAlt} className="w-3 h-3" />
