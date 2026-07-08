@@ -1,7 +1,6 @@
-import resend
+import smtplib
+from email.mime.text import MIMEText
 from app.core.config import settings
-
-resend.api_key = settings.RESEND_API_KEY
 
 _BRAND_PRIMARY = "#5b1660"
 _BRAND_PRIMARY_DARK = "#451149"
@@ -14,7 +13,6 @@ _NAVBAR = "#211228"
 
 
 def _score_color(score) -> tuple[str, str]:
-    """Returns (text_color, bg_color) matching the app's match-score convention."""
     try:
         score = float(score)
     except (TypeError, ValueError):
@@ -36,6 +34,11 @@ def _job_card_html(job: dict) -> str:
     description = (job.get("job_description") or "")[:160].strip()
     if len(job.get("job_description") or "") > 160:
         description += "…"
+
+    # Point to the local frontend instead of the external apply link
+    frontend_url = "http://localhost:5173"
+    job_id = job.get("job_id") or ""
+    view_link = f"{frontend_url}/job-board?job_id={job_id}"
 
     return f"""
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
@@ -60,7 +63,7 @@ def _job_card_html(job: dict) -> str:
             </tr>
           </table>
           {f'<p style="margin:10px 0 0 0; font-size:13px; color:{_MUTED}; line-height:1.5;">{description}</p>' if description else ''}
-          <a href="{apply_link}"
+          <a href="{view_link}"
              style="display:inline-block; margin-top:14px; padding:9px 18px; border-radius:8px; background:{_BRAND_PRIMARY}; color:#ffffff; font-size:13px; font-weight:600; text-decoration:none;">
             View &amp; Apply
           </a>
@@ -89,7 +92,7 @@ async def send_job_alert_email(to: str, jobs: list, alert_keywords: list[str]) -
         <tr>
           <td style="background:{_CARD}; padding:28px; border:1px solid {_BORDER}; border-top:none;">
             <p style="margin:0 0 4px 0; font-size:18px; font-weight:700; color:{_FOREGROUND};">
-              {job_count} new job{'s' if job_count != 1 else ''} matching "{keyword_text}"
+              {job_count} new job{'s' if job_count != 1 else ''} matching &quot;{keyword_text}&quot;
             </p>
             <p style="margin:0 0 22px 0; font-size:13px; color:{_MUTED};">
               We found these while you were away — ranked by how well they fit your profile.
@@ -111,9 +114,20 @@ async def send_job_alert_email(to: str, jobs: list, alert_keywords: list[str]) -
     </div>
     """
 
-    resend.Emails.send({
-        "from": settings.EMAIL_FROM,
-        "to": [to],
-        "subject": f"{job_count} new job match{'es' if job_count != 1 else ''} for \"{keyword_text}\"",
-        "html": html,
-    })
+    if not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD:
+        print("[email_service] Gmail SMTP not configured — skipping email send")
+        return
+
+    msg = MIMEText(html, "html")
+    msg["Subject"] = f"{job_count} new job match{'es' if job_count != 1 else ''} for \"{keyword_text}\""
+    msg["From"] = settings.EMAIL_FROM or settings.EMAIL_HOST_USER
+    msg["To"] = to
+
+    try:
+        with smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT, timeout=30) as server:
+            server.starttls()
+            server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+            server.sendmail(msg["From"], [to], msg.as_string())
+        print(f"[email_service] Alert sent to {to}")
+    except Exception as e:
+        print(f"[email_service] Failed to send alert email to {to}: {e}")

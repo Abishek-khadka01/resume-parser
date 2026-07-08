@@ -131,7 +131,7 @@ async def ats_analysis(
             job = {**job, **details}
 
     analysis = await ats_service.analyze_job(job, profile)
-    suggestions = suggestion_service.generate_suggestions(job, profile, analysis)
+    suggestions = suggestion_service.generate_suggestions(job, profile, analysis) if analysis.get("score", 0) >= 5 else []
 
     return {**analysis, "suggestions": suggestions}
 
@@ -152,4 +152,7 @@ async def optimize_resume(
         if details:
             job = {**job, **details}
 
-    return await resume_optimizer_service.optimize_resume(job, profile)
+    optimization = await resume_optimizer_service.optimize_resume(job, profile)
+    if optimization.get("score_before", 0) < 5:
+        optimization["changes"] = []
+    return optimization

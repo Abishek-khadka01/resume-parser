@@ -4,7 +4,7 @@ import re
 from reportlab.lib.pagesizes import LETTER
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, ListFlowable, ListItem
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 
 _styles = getSampleStyleSheet()
 _HEADING = ParagraphStyle("SectionHeading", parent=_styles["Heading2"], spaceBefore=12, spaceAfter=4)
@@ -19,14 +19,9 @@ def _split_sentences(text: str) -> list[str]:
     return [s.strip() for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s.strip()]
 
 
-def _bullet_list(items: list[str]) -> ListFlowable:
-    return ListFlowable(
-        [ListItem(Paragraph(item, _BULLET_TEXT), spaceAfter=2) for item in items],
-        bulletType="bullet",
-        leftIndent=16,
-        spaceBefore=2,
-        spaceAfter=6,
-    )
+def _bullet_list(items: list[str]) -> Paragraph:
+    inline = " · ".join(items)
+    return Paragraph(f"• {inline}", _BULLET_TEXT)
 
 
 def build_optimized_resume_pdf(profile, optimization: dict) -> bytes:

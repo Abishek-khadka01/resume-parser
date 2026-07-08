@@ -13,7 +13,7 @@ from app.services.ai_service import parse_resume_text  # noqa: F401  (kept as th
 from app.ml_resume_parser.pipeline import parse_resume as parse_resume_ml
 from app.services.job_service import get_job_details
 from app.services.profile_service import calculate_completeness
-from app.services import skill_service, pdf_service, resume_optimizer_service
+from app.services import skill_service, pdf_service, resume_optimizer_service, ats_service, job_service, email_service
 import io
 
 router = APIRouter()
@@ -84,6 +84,22 @@ async def upload_resume(
     profile.completeness_pct = calculate_completeness(profile)
     db.commit()
     db.refresh(profile)
+
+    # Auto-send matching jobs by email after first resume upload
+    try:
+        query = profile.desired_title or " ".join(profile.skills or [])
+        if query:
+            jobs, _ = await job_service.search_jobs(query=query, num_pages=1)
+            if jobs:
+                jobs = await ats_service.score_jobs_batch(jobs, profile)
+                top_jobs = sorted(jobs, key=lambda j: j.get("match_score", 0), reverse=True)[:5]
+                await email_service.send_job_alert_email(
+                    current_user.email, top_jobs, [query]
+                )
+    except Exception:
+        import logging
+        logging.getLogger(__name__).exception("Failed to send welcome job alert email")
+
     return profile
 
 

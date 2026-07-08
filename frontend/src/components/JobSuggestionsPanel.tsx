@@ -73,7 +73,7 @@ export default function JobSuggestionsPanel({ job, onScoreResolved }: JobSuggest
           <Skeleton className="h-14 w-full" />
           <Skeleton className="h-14 w-full" />
         </div>
-      ) : optimization ? (
+      ) : optimization && optimization.score_before >= 5 ? (
         <>
           <div className="flex items-center gap-1.5 mb-3 shrink-0">
             <span className={`text-lg font-bold ${getMatchColor(optimization.score_before)}`}>
@@ -116,6 +116,8 @@ export default function JobSuggestionsPanel({ job, onScoreResolved }: JobSuggest
             Download Optimized Resume
           </button>
         </>
+      ) : optimization ? (
+        <p className="text-xs text-muted-foreground">This job is not a strong match — no suggestions available.</p>
       ) : (
         <p className="text-xs text-muted-foreground">Could not load suggestions.</p>
       )}

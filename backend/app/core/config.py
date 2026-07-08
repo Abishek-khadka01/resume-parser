@@ -17,8 +17,11 @@ class Settings(BaseSettings):
     JSEARCH_RAPIDAPI_HOST: str = "jsearch.p.rapidapi.com"
     JSEARCH_BASE_URL: str = "https://jsearch.p.rapidapi.com"
 
-    RESEND_API_KEY: str
-    EMAIL_FROM: str = "alerts@resumematch.app"
+    EMAIL_HOST: str = "smtp.gmail.com"
+    EMAIL_PORT: int = 587
+    EMAIL_HOST_USER: str = ""
+    EMAIL_HOST_PASSWORD: str = ""
+    EMAIL_FROM: str = ""
 
     R2_ACCOUNT_ID: str = ""
     R2_ACCESS_KEY_ID: str = ""

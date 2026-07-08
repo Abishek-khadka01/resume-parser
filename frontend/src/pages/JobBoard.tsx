@@ -1,4 +1,4 @@
-import { useState, useCallback, Fragment } from 'react'
+import { useState, useCallback, useMemo, Fragment } from 'react'
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -66,7 +66,15 @@ export default function JobBoard() {
     getNextPageParam: (lastPage) => lastPage.cursor || undefined,
     retry: 1,
   })
-  const jobs = data?.pages.flatMap((page) => page.jobs)
+  const jobs = useMemo(() => {
+    if (!data?.pages) return undefined
+    const all = data.pages.flatMap((page) => page.jobs)
+    return all.sort((a, b) => {
+      const scoreA = resolvedScores[a.job_id] ?? a.match_score ?? 0
+      const scoreB = resolvedScores[b.job_id] ?? b.match_score ?? 0
+      return scoreB - scoreA
+    })
+  }, [data, resolvedScores])
 
   const saveMutation = useMutation({
     mutationFn: (job: Job) =>
