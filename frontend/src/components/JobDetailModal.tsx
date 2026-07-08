@@ -62,7 +62,7 @@ export default function JobDetailModal({ job, open, onOpenChange }: JobDetailMod
   const { data: optimization, isLoading: isOptimizing } = useQuery({
     queryKey: ['resume-optimization', job?.job_id],
     queryFn: () => getResumeOptimization(job as Job),
-    enabled: open && !!job && activeTab === 'optimize',
+    enabled: open && !!job && activeTab !== 'overview',
   })
 
   const handleDownloadOptimized = async () => {
@@ -133,9 +133,20 @@ export default function JobDetailModal({ job, open, onOpenChange }: JobDetailMod
               <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4 items-start">
                 <div className="space-y-4">
                   <div className="space-y-1.5">
-                    <span className={`text-3xl font-bold ${getMatchColor(analysis.score)}`}>
-                      {analysis.score}/10
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-3xl font-bold ${getMatchColor(analysis.score)}`}>
+                        {analysis.score}/10
+                      </span>
+                      {optimization && optimization.score_after > optimization.score_before && (
+                        <div className="flex items-center gap-1.5">
+                          <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4 text-muted-foreground" />
+                          <span className={`text-xl font-bold ${getMatchColor(optimization.score_after)}`}>
+                            {optimization.score_after}/10
+                          </span>
+                          <span className="text-[11px] text-muted-foreground">potential with optimization</span>
+                        </div>
+                      )}
+                    </div>
                     <span className="block text-xs text-muted-foreground">
                       skill match {Math.round(analysis.skill_score * 100)}% · keyword similarity{' '}
                       {Math.round(analysis.text_score * 100)}% · semantic similarity{' '}
